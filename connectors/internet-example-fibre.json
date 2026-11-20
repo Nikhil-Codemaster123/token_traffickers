@@ -1,0 +1,27 @@
+{
+  "$schema": "./schema.json",
+  "$comment": "Paper example only: shows the same 9 fields fit a second partner type. Not wired into the app.",
+  "identity": {
+    "partner_id": "p_fibre",
+    "name": "Example Fibre GmbH",
+    "category": "internet",
+    "job_channel": "api"
+  },
+  "offers": [{ "name": "Fibre 500", "price_eur": 34.99, "per": "month" }],
+  "eligibility": {
+    "requires": ["address in its fibre area", "move-in date known"]
+  },
+  "availability": { "kind": "earliest_date" },
+  "data_needed": ["name", "address", "move-in date"],
+  "consent_scope": {
+    "fields": ["name", "address", "move-in date"],
+    "basis": "tenant_yes"
+  },
+  "order": {
+    "method": "order with pre-filled fields, signed in one click"
+  },
+  "status_updates": ["ordered", "signed", "active", "cancelled"],
+  "result": {
+    "writes": ["service_contract with consent"]
+  }
+}

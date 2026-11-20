@@ -1,0 +1,59 @@
+{
+  "$schema": "./schema.json",
+  "identity": {
+    "partner_id": "p_schmidt",
+    "name": "Heizung Schmidt GmbH",
+    "category": "heating",
+    "job_channel": "whatsapp",
+    "offer_channel": "email"
+  },
+  "offers": [
+    { "name": "Repair call-out", "price_eur": 59, "per": "visit", "note": "framework rate (synthetic)" },
+    { "name": "Labour", "price_eur": 78, "per": "hour", "note": "framework rate (synthetic)" },
+    { "name": "Maintenance", "note": "at framework rates" },
+    { "name": "Bigger jobs (e.g. a new boiler)", "note": "offer by email; above the owner's limit the owner approves first" }
+  ],
+  "eligibility": {
+    "trades": ["heating", "plumbing"],
+    "fuels": ["gas"],
+    "postcodes": ["52062", "52064", "52066"]
+  },
+  "availability": {
+    "kind": "slots",
+    "fallback": "the firm proposes another time on the job card"
+  },
+  "data_needed": ["address", "flat", "heating type and fuel", "building year", "symptoms", "photos", "access notes"],
+  "consent_scope": {
+    "fields": ["name", "phone", "flat", "access notes", "photos"],
+    "basis": "lease",
+    "release": "before Accept: problem, street, slot; after Accept: flat, name, phone, photos; access notes on the appointment day only, hidden again after Done"
+  },
+  "order": {
+    "method": "WhatsApp message with a link to the job card",
+    "partner_actions": ["accept", "propose another time", "done + invoice upload"]
+  },
+  "status_updates": ["accepted", "scheduled", "offer sent", "done", "invoiced", "cancelled"],
+  "result": {
+    "writes": ["completed case", "appointment", "invoice billed to Reltix"],
+    "example": {
+      "unit_id": "unit_2a",
+      "contact_id": "c_203",
+      "case": {
+        "case_id": "case_4c34f988",
+        "category": "heating",
+        "scope": "building",
+        "partner": "Heizung Schmidt GmbH",
+        "status": "closed",
+        "approval": "auto",
+        "appointment": { "start": "2026-11-21T12:00:00+01:00", "end": "2026-11-21T14:00:00+01:00" },
+        "invoice": { "number": "R-2026-1121", "amount_eur": 318.4, "billed_to": "reltix", "document_id": "doc_47d382b3" },
+        "consent": {
+          "data_shared": ["name", "phone", "unit", "access_notes", "photos"],
+          "legal_basis": "lease",
+          "given_at": "2026-11-20T17:32:03+01:00",
+          "channel": "voice"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "centrix partner connector",
+  "description": "What a partner fills in to plug into centrix: the 5 things Reltix asks for (offers, eligibility, availability, order, status updates) plus identity, data needed, consent scope and the result written back.",
+  "type": "object",
+  "required": ["identity", "offers", "eligibility", "availability", "data_needed", "consent_scope", "order", "status_updates", "result"],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["name", "category", "job_channel"],
+      "properties": {
+        "partner_id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "examples": ["heating", "internet"] },
+        "job_channel": { "enum": ["whatsapp", "email", "api"] },
+        "offer_channel": { "enum": ["whatsapp", "email", "api"] }
+      }
+    },
+    "offers": {
+      "description": "What can be booked or bought, with prices",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "price_eur": { "type": "number" },
+          "per": { "type": "string", "examples": ["visit", "hour", "month"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "eligibility": {
+      "description": "When the partner fits a unit or a case",
+      "type": "object",
+      "properties": {
+        "trades": { "type": "array", "items": { "type": "string" } },
+        "fuels": { "type": "array", "items": { "type": "string" } },
+        "postcodes": { "type": "array", "items": { "type": "string" } },
+        "requires": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "availability": {
+      "description": "When the partner can deliver",
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["slots", "earliest_date", "on_request"] },
+        "fallback": { "type": "string" }
+      }
+    },
+    "data_needed": {
+      "description": "centrix fields pre-filled for the partner",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "consent_scope": {
+      "description": "Fields shared with the partner, on what basis, and when they are released",
+      "type": "object",
+      "required": ["fields", "basis"],
+      "properties": {
+        "fields": { "type": "array", "items": { "type": "string" } },
+        "basis": { "enum": ["lease", "tenant_yes"] },
+        "release": { "type": "string" }
+      }
+    },
+    "order": {
+      "description": "How centrix places the job or order",
+      "type": "object",
+      "required": ["method"],
+      "properties": {
+        "method": { "type": "string" },
+        "partner_actions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "status_updates": {
+      "description": "Events the partner sends back to centrix",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "result": {
+      "description": "What lands on the unit when the loop closes",
+      "type": "object",
+      "required": ["writes"],
+      "properties": {
+        "writes": { "type": "array", "items": { "type": "string" } },
+        "example": { "type": "object" }
+      }
+    }
+  }
+}
