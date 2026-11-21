@@ -17,7 +17,8 @@ export default function Home() {
       <div className={surface}>
         <header className="flex items-center justify-between gap-8 rounded-t-2xl bg-indigo-900 px-5 py-8 text-white sm:px-8">
           <div className="max-w-lg space-y-3">
-            <h1 className="text-2xl font-semibold tracking-tight">Broken heater → craftsman</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">centrix partner studio</h1>
+            <p className="text-sm font-medium tracking-wide text-indigo-200">Broken heater → craftsman</p>
             <p className="max-w-[50ch] text-pretty text-indigo-100">A partner plugged into centrix: one tenant call, the craftsman gets the job, the result lands on the unit.</p>
           </div>
           <div aria-hidden="true" className="hidden shrink-0 sm:block">

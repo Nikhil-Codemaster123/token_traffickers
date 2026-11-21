@@ -62,7 +62,7 @@ export function OwnerOffer({ token }: { token: string }) {
             ) : data.canApprove ? (
               <button disabled={busy} onClick={approve} className={`${btn.success} w-full py-3.5`}><Icon name="check" />{busy ? "Approving…" : "Approve"}</button>
             ) : (
-              <p className="-order-1 rounded-xl bg-white px-4 py-3 text-sm text-slate-600 ring-1 ring-slate-900/5">This offer is no longer awaiting approval.</p>
+              <p className="-order-1 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600 ring-1 ring-slate-900/5">This offer is no longer awaiting approval.</p>
             )}
             {actionError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800 ring-1 ring-rose-200 ring-inset">{actionError}</p>}
           </>

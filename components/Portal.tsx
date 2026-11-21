@@ -75,7 +75,7 @@ export function Portal({ caseId }: { caseId: string }) {
           </ol>
 
           {data.status === "completed" && (
-            <div className={`${phoneCard} space-y-3 bg-linear-to-br from-white to-indigo-50/70`}>
+            <div className={`${phoneCard} space-y-3 bg-linear-to-br from-slate-50 to-indigo-50/70`}>
               <h2 className="text-base font-semibold tracking-tight text-slate-950">Is your heating working again?</h2>
               <div className="grid gap-3">
                 <button disabled={!!busy} onClick={() => run("yes", () => post(`/api/portal/${caseId}/confirm`, { fixed: true }))} className={`${btn.success} py-3.5`}><Icon name="check" />Yes, it works</button>

@@ -118,7 +118,7 @@ export function CaseView({ id }: { id: string }) {
           events={data.events}
         />
 
-        <Card title={<span className="flex items-center gap-3"><span className={iconTile}><Icon name="activity" /></span>Effort for this repair</span>} className="bg-linear-to-br from-white via-white to-indigo-100/75">
+        <Card title={<span className="flex items-center gap-3"><span className={iconTile}><Icon name="activity" /></span>Effort for this repair</span>} className="bg-linear-to-br from-slate-50 via-slate-50 to-indigo-100/75">
           <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
             <Field row label={data.effort.tenant_calls > 1 ? "Tenants" : "Tenant"} value={plural(data.effort.tenant_calls, "call")} />
             <Field row label="Craftsman" value={plural(data.effort.craftsman_taps, "tap")} />
@@ -301,7 +301,7 @@ function Field({ label, value, row = false }: { label: string; value: string; ro
   if (row) {
     const [count, ...unit] = value.split(" ");
     return (
-      <div className="flex min-w-0 flex-col-reverse justify-end gap-2 rounded-xl bg-white/80 px-3 py-4 ring-1 ring-indigo-900/10 sm:px-4">
+              <div className="flex min-w-0 flex-col-reverse justify-end gap-2 rounded-xl bg-slate-50/80 px-3 py-4 ring-1 ring-indigo-900/10 sm:px-4">
         <dt className={meta}>{label}</dt>
         <dd className="text-sm leading-5 font-medium text-indigo-800">
           <span className="text-3xl leading-none font-semibold tracking-tight text-indigo-900 tabular-nums sm:text-[2.5rem]">{count}</span> {unit.join(" ")}

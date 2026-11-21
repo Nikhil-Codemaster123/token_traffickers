@@ -41,7 +41,7 @@ export const pageWidth = "mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8";
 
 export function CentrixHeader({ caseId }: { caseId?: string }) {
   return (
-    <header className="border-b border-slate-200/80 bg-white/80">
+    <header className="border-b border-slate-300/80 bg-slate-100/80">
       <div className={`${pageWidth} flex min-h-12 items-center gap-3 py-2`}>
         <BrandMark />
         <p className="min-w-0 text-xs font-semibold tracking-[0.1em] text-slate-800 uppercase">
@@ -73,9 +73,9 @@ export function StatusChip({ status, waitingForOwner = false }: { status: string
   return <span className={`${chip} ${s.cls}`}>{status === "awaiting_approval" && waitingForOwner ? "Waiting for owner" : s.label}</span>;
 }
 
-export const surface = "min-w-0 rounded-2xl bg-white shadow-[0_1px_2px_rgba(15,23,42,.04),0_12px_24px_-18px_rgba(15,23,42,.22)] ring-1 ring-slate-900/5";
+export const surface = "min-w-0 rounded-2xl bg-slate-50/90 shadow-[0_1px_2px_rgba(15,23,42,.06),0_12px_24px_-18px_rgba(15,23,42,.24)] ring-1 ring-slate-400/25";
 export const meta = "text-xs leading-4 font-semibold uppercase tracking-[0.075em] text-slate-500";
-export const inputClass = "min-w-0 rounded-xl border border-slate-400 bg-white px-3 text-base text-slate-900 shadow-xs placeholder:text-slate-500 hover:border-slate-500 focus:border-indigo-600 motion-safe:transition-colors motion-safe:duration-150 sm:text-sm";
+export const inputClass = "min-w-0 rounded-xl border border-slate-400 bg-slate-100 px-3 text-base text-slate-900 shadow-xs placeholder:text-slate-500 hover:border-slate-500 focus:border-indigo-600 motion-safe:transition-colors motion-safe:duration-150 sm:text-sm";
 export const linkClass = "rounded-sm font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-900 hover:decoration-indigo-700 motion-safe:transition-colors motion-safe:duration-150";
 export const iconTile = "grid size-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 ring-inset";
 export const phoneCard = `${surface} p-4 sm:p-5`;
@@ -99,8 +99,8 @@ const buttonBase = "inline-flex min-h-11 min-w-0 cursor-pointer items-center jus
 const primary = `${buttonBase} bg-indigo-600 text-white shadow-[0_1px_2px_#29205d26,inset_0_1px_0_#ffffff26] ring-1 ring-indigo-900/20 ring-inset hover:bg-indigo-700 active:bg-indigo-800 disabled:ring-slate-200`;
 export const btn = {
   primary,
-  secondary: `${buttonBase} bg-white text-slate-700 shadow-xs ring-1 ring-slate-300 ring-inset hover:bg-slate-50 active:bg-slate-100 disabled:ring-slate-200`,
-  danger: `${buttonBase} bg-white text-rose-800 shadow-xs ring-1 ring-rose-200 ring-inset hover:bg-rose-50 active:bg-rose-100 disabled:ring-slate-200`,
+  secondary: `${buttonBase} bg-slate-100 text-slate-700 shadow-xs ring-1 ring-slate-300 ring-inset hover:bg-slate-200 active:bg-slate-300 disabled:ring-slate-200`,
+  danger: `${buttonBase} bg-slate-100 text-rose-800 shadow-xs ring-1 ring-rose-200 ring-inset hover:bg-rose-50 active:bg-rose-100 disabled:ring-slate-200`,
   success: primary,
 };
 
@@ -108,12 +108,12 @@ export const btn = {
 export function PhoneFrame({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className={`${pageWidth} flex items-start justify-center py-6 sm:py-8`}>
-      <div className="w-full max-w-md rounded-2xl bg-white/65 shadow-[0_2px_6px_rgba(15,23,42,.05),0_20px_56px_-24px_rgba(42,35,88,.24)] ring-1 ring-slate-900/8">
+      <div className="w-full max-w-md rounded-2xl bg-slate-200/70 shadow-[0_2px_6px_rgba(15,23,42,.07),0_20px_56px_-24px_rgba(42,35,88,.24)] ring-1 ring-slate-400/25">
         <div className="flex min-h-14 items-center justify-between gap-4 rounded-t-2xl bg-indigo-900 px-4 py-3 text-indigo-50 ring-1 ring-white/10 ring-inset sm:px-5">
           <span className="text-sm font-semibold tracking-tight">{label}</span>
           <BrandMark />
         </div>
-        <div className="rounded-b-2xl bg-slate-50/65 [&_button]:w-full [&_label:has(input[type=file])]:min-h-11">{children}</div>
+        <div className="rounded-b-2xl bg-slate-100/85 [&_button]:w-full [&_label:has(input[type=file])]:min-h-11">{children}</div>
       </div>
     </div>
   );

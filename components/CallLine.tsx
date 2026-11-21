@@ -29,7 +29,7 @@ export function CallLine({ agentId }: { agentId?: string }) {
   return (
     <div className={`line-page ${pageWidth} grid items-start gap-6 py-6 sm:py-8 md:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]`}>
       <section className={`${surface} p-5 sm:p-6`}>
-        <header className="-mx-5 -mt-5 mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 rounded-t-2xl border-b border-indigo-100 bg-linear-to-br from-indigo-50 to-white p-5 sm:-mx-6 sm:-mt-6 sm:p-6">
+        <header className="-mx-5 -mt-5 mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 rounded-t-2xl border-b border-indigo-100 bg-linear-to-br from-indigo-50 to-slate-50 p-5 sm:-mx-6 sm:-mt-6 sm:p-6">
           <div className="flex min-w-0 items-start gap-3">
             <span className={iconTile}><Icon name="phone" /></span>
             <h1 className="text-2xl leading-8 font-semibold tracking-tight text-slate-950">
@@ -41,7 +41,7 @@ export function CallLine({ agentId }: { agentId?: string }) {
               {mode === "agent" ? "use fallback loop" : "use ElevenLabs agent"}
             </button>
           ) : (
-            <span className="rounded-full bg-white px-3 py-1 text-xs leading-5 font-semibold text-slate-600 ring-1 ring-slate-200">fallback loop</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs leading-5 font-semibold text-slate-600 ring-1 ring-slate-200">fallback loop</span>
           )}
         </header>
         <label className="mb-4 block rounded-xl bg-slate-50 p-4 ring-1 ring-slate-900/5">
@@ -221,7 +221,7 @@ function VoiceLoop({ contactId }: { contactId: string }) {
         {msgs.length === 0 && <p className="flex items-start gap-3 text-sm text-pretty text-slate-600"><Icon name="activity" className="mt-1 size-4 text-indigo-700" />Press “Call the line”, then talk (Chrome) or type.</p>}
         {msgs.map((m, i) => (
           <div key={i} className={`flex ${m.who === "caller" ? "justify-end" : "justify-start"}`}>
-            <p className={`max-w-[90%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-white text-slate-800 ring-1 ring-slate-900/8"}`}>{m.text}</p>
+            <p className={`max-w-[90%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-slate-50 text-slate-800 ring-1 ring-slate-900/8"}`}>{m.text}</p>
           </div>
         ))}
       </div>

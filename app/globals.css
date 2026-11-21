@@ -6,16 +6,16 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --text-sm--line-height: 1.5rem;
 
-  --color-indigo-50: #f2f1fc;
-  --color-indigo-100: #e9e5fb;
-  --color-indigo-200: #d9d3f5;
-  --color-indigo-300: #bcb2eb;
-  --color-indigo-400: #9788dd;
-  --color-indigo-500: #6958c5;
-  --color-indigo-600: #5143ad;
-  --color-indigo-700: #453797;
-  --color-indigo-800: #362a77;
-  --color-indigo-900: #2c2456;
+  --color-indigo-50: #f0f4f8;
+  --color-indigo-100: #e1e9f0;
+  --color-indigo-200: #c8d5e1;
+  --color-indigo-300: #a6b9ca;
+  --color-indigo-400: #829bb1;
+  --color-indigo-500: #637f98;
+  --color-indigo-600: #4d6982;
+  --color-indigo-700: #3d566d;
+  --color-indigo-800: #314556;
+  --color-indigo-900: #273947;
   --color-slate-50: #f7f8fa;
   --color-slate-400: #8290a6;
   --color-slate-500: #546277;
@@ -29,7 +29,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #eae6f987, transparent), linear-gradient(#faf9fc, #f7f8fa 36rem);
+  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #dfe3e987, transparent), linear-gradient(#eef0f3, #e5e8ec 36rem);
 }
 
 :where(a, button, input, select, textarea):focus-visible,

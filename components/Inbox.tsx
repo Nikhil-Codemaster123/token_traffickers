@@ -121,7 +121,7 @@ export function Inbox() {
 
 function Kpi({ label, value }: { label: string; value: number }) {
   return (
-    <div className={`${surface} grid content-start gap-3 bg-linear-to-br from-white via-white to-indigo-50/80 p-4 sm:p-5`}>
+    <div className={`${surface} grid content-start gap-3 bg-linear-to-br from-slate-50 via-slate-50 to-indigo-50/80 p-4 sm:p-5`}>
       <div className="flex items-start justify-between gap-1.5">
         <div className="min-w-0 text-3xl leading-none font-semibold tracking-tight wrap-anywhere text-slate-950 tabular-nums sm:text-[2.5rem]">{value}</div>
         <span className={iconTile}><Icon name={label === "Open cases" ? "inbox" : "bolt"} /></span>
