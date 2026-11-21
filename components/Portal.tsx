@@ -65,11 +65,11 @@ export function Portal({ caseId }: { caseId: string }) {
             <p className="wrap-anywhere">{data.symptoms}</p>
           </header>
 
-          <ol className="grid gap-2 @min-[17rem]:grid-cols-[repeat(5,auto)] @min-[17rem]:gap-1">
+          <ol className="repair-progress">
             {STEPS.map((s) => (
-              <li key={s.label} className="flex items-center gap-2 @min-[17rem]:block">
-                <div className={`size-2 shrink-0 rounded-full @min-[17rem]:h-1 @min-[17rem]:w-full ${s.when(data.status) ? "bg-emerald-600" : "bg-slate-200"}`} />
-                <div className={`text-xs leading-4 @min-[17rem]:mt-2 ${s.when(data.status) ? "font-medium text-slate-800" : "text-slate-500"}`}>{s.label}</div>
+              <li key={s.label}>
+                <div className={`step-marker ${s.when(data.status) ? "step-complete" : ""}`} />
+                <div className={`text-xs leading-4 ${s.when(data.status) ? "font-medium text-slate-800" : "text-slate-500"}`}>{s.label}</div>
               </li>
             ))}
           </ol>
@@ -87,10 +87,13 @@ export function Portal({ caseId }: { caseId: string }) {
           {data.status === "stopped" ? (
             <div className="rounded-lg bg-rose-50 px-4 py-3 text-rose-800">The property manager paused this appointment and will contact you.</div>
           ) : data.partner ? (
-            <div className="space-y-1 border-l-2 border-indigo-400 bg-indigo-50/25 px-4 py-3">
-              <div className={meta}>Appointment</div>
-              <div className="font-semibold text-slate-900">{data.appointment || "being arranged"}</div>
-              <div>{data.partner}</div>
+            <div className="flex items-start gap-4 border-y border-slate-200 py-4">
+              <span aria-hidden="true" className="calendar-mark mt-1 text-indigo-700" />
+              <div className="min-w-0 space-y-1">
+                <div className={meta}>Appointment</div>
+                <div className="font-semibold text-slate-950">{data.appointment || "being arranged"}</div>
+                <div className="text-slate-600">{data.partner}</div>
+              </div>
             </div>
           ) : null}
 
@@ -127,7 +130,7 @@ export function Portal({ caseId }: { caseId: string }) {
             <ol className="space-y-3">
               {[...data.updates].reverse().map((u, i) => (
                 <li key={i} className="flex gap-3 text-sm">
-                  <span className="w-11 shrink-0 text-xs leading-6 text-slate-500 tabular-nums">{fmtTime(u.at)}</span>
+                  <span className="w-11 shrink-0 font-mono text-xs leading-6 text-slate-500 tabular-nums">{fmtTime(u.at)}</span>
                   <span className="min-w-0 wrap-anywhere">{u.text}</span>
                 </li>
               ))}

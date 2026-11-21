@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { fmtTime } from "@/lib/time";
 import { Timeline, type Ev } from "./Timeline";
-import { btn, Card, linkClass, meta, Spinner, StatusChip } from "./ui";
+import { btn, Card, linkClass, meta, recordLabel, Spinner, StatusChip } from "./ui";
 import { post, usePoll } from "./usePoll";
 
 type Doc = { document_id: string; type: string; file_url: string | null; number: string | null; amount_eur: number | null; billed_to: string | null };
@@ -73,23 +73,26 @@ export function CaseView({ id }: { id: string }) {
 
   return (
     <div className="centrix-page mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <Link href="/centrix" className="rounded-sm text-sm font-medium text-indigo-700 hover:underline hover:underline-offset-4">← Inbox</Link>
-
-      <header className="my-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="min-w-0 space-y-2 wrap-anywhere">
-          <p className="text-xs font-medium uppercase tracking-wide text-indigo-700">centrix · mock · {c.case_id}</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-            {c.unit_id}{c.scope === "building" ? " · whole building" : ""} · <span className="capitalize">{c.category}</span>
-          </h1>
-          <p className="text-sm leading-6 text-slate-700">
-            {data.property.address}, {data.property.postcode} {data.property.city} · {data.property.heating} {data.property.fuel} heating, built {data.property.building_year}
-          </p>
+      <header className="mb-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-slate-200 pb-3">
+          <Link href="/centrix" className="rounded-sm text-sm font-medium text-indigo-700 hover:underline hover:underline-offset-4">← Inbox</Link>
+          <p className={recordLabel}>centrix · mock · <span className="font-mono font-normal tracking-normal text-slate-500 normal-case">{c.case_id}</span></p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} />
-          {STOPPABLE.includes(c.status) && (
-            <button disabled={busy} onClick={() => act("stop")} className={btn.danger}>Stop dispatch</button>
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0 space-y-1 wrap-anywhere">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+              {c.unit_id}{c.scope === "building" ? " · whole building" : ""} · <span className="capitalize">{c.category}</span>
+            </h1>
+            <p className="text-sm leading-6 text-slate-600">
+              {data.property.address}, {data.property.postcode} {data.property.city} · {data.property.heating} {data.property.fuel} heating, built {data.property.building_year}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} />
+            {STOPPABLE.includes(c.status) && (
+              <button disabled={busy} onClick={() => act("stop")} className={btn.danger}>Stop dispatch</button>
+            )}
+          </div>
         </div>
       </header>
       {actionError && <p className="mb-6 rounded-lg bg-rose-50 px-4 py-3 text-rose-800">{actionError}</p>}
@@ -97,8 +100,8 @@ export function CaseView({ id }: { id: string }) {
       <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]">
         <div className="min-w-0 space-y-6">
           <Card title="Reported by the tenant" aside={<span className="text-xs text-slate-500">{fmtTime(c.created_at)} · by phone</span>}>
-            <p className="wrap-anywhere">{c.symptoms}</p>
-            <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
+            <p className="text-pretty wrap-anywhere text-slate-800">{c.symptoms}</p>
+            <dl className="-mx-5 mt-5 -mb-5 grid grid-cols-2 gap-x-4 gap-y-3 rounded-b-2xl border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:-mx-6 sm:-mb-6 sm:grid-cols-3 sm:px-6">
               <Field label="Tenant" value={data.contact ? `${data.contact.name}${c.reporters.length > 1 ? ` +${c.reporters.length - 1}` : ""}` : "—"} />
               <Field label="Urgency" value={c.urgency} />
               <Field label="Home" value={c.availability_note ?? "—"} />
@@ -118,8 +121,8 @@ export function CaseView({ id }: { id: string }) {
         </div>
 
         <div className="min-w-0 space-y-6">
-          <Card title="Effort for this repair" className="border-t-2 border-indigo-500">
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-5 border-t border-slate-100 pt-4">
+          <Card title="Effort for this repair">
+            <dl className="-mx-5 -mb-5 grid grid-cols-2 overflow-hidden rounded-b-2xl border-t border-indigo-100 bg-indigo-50/60 sm:-mx-6 sm:-mb-6">
               <Field row label={data.effort.tenant_calls > 1 ? "Tenants" : "Tenant"} value={plural(data.effort.tenant_calls, "call")} />
               <Field row label="Craftsman" value={plural(data.effort.craftsman_taps, "tap")} />
               <Field row label="Property manager" value={plural(data.effort.manager_clicks, "click")} />
@@ -131,7 +134,7 @@ export function CaseView({ id }: { id: string }) {
             {data.partner ? (
               <>
                 <div className="font-medium text-slate-900">{data.partner.name}</div>
-                <div className="mt-1 text-slate-600">{data.appointment || "no slot yet"}</div>
+                <div className="mt-1 text-sm text-slate-600">{data.appointment || "no slot yet"}</div>
                 <ul className="mt-3 space-y-3 border-t border-slate-100 pt-3">
                   {c.pick_reasons.map((r) => <li key={r} className="flex gap-3"><span className="font-medium text-indigo-700">✓</span>{r}</li>)}
                 </ul>
@@ -143,11 +146,19 @@ export function CaseView({ id }: { id: string }) {
 
           <Card title="Approval">
             {offer ? (
-              <p className="text-sm">Offer {offer.number} <b>{euros.format(Number(offer.amount_eur))}</b> · owner&apos;s limit <b>{euros.format(c.offer_approval_limit_eur ?? data.approval_limit_eur)}</b></p>
+              <p className="approval-amounts">
+                <span>Offer {offer.number} <b>{euros.format(Number(offer.amount_eur))}</b></span>
+                <span> · </span>
+                <span>owner&apos;s limit <b>{euros.format(c.offer_approval_limit_eur ?? data.approval_limit_eur)}</b></span>
+              </p>
             ) : c.estimated_cost_eur === null ? (
               <p className="text-sm text-slate-500">No estimate yet.</p>
             ) : (
-              <p className="text-sm">Estimate <b>€{c.estimated_cost_eur}</b> · owner&apos;s limit <b>€{data.approval_limit_eur}</b></p>
+              <p className="approval-amounts">
+                <span>Estimate <b>€{c.estimated_cost_eur}</b></span>
+                <span> · </span>
+                <span>owner&apos;s limit <b>€{data.approval_limit_eur}</b></span>
+              </p>
             )}
             {c.approval === "owner" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Approved by the owner.</p>}
             {offer && Number(offer.amount_eur) <= (c.offer_approval_limit_eur ?? data.approval_limit_eur) && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Within the limit. The firm can go ahead.</p>}
@@ -194,9 +205,9 @@ export function CaseView({ id }: { id: string }) {
           </Card>
 
           <Card title="Demo shortcuts">
-            <div className="flex flex-col items-start gap-3">
-              <Link href={`/portal/${c.case_id}`} target="_blank" className={linkClass}>Tenant portal ↗</Link>
-              {c.job_token && <Link href={`/job/${c.job_token}`} target="_blank" className={linkClass}>Craftsman job card ↗</Link>}
+            <div className="divide-y divide-slate-100">
+              <Link href={`/portal/${c.case_id}`} target="_blank" className="flex min-h-10 items-center justify-between gap-3 rounded-sm font-medium text-indigo-700 hover:text-indigo-900 hover:underline">Tenant portal <span>↗</span></Link>
+              {c.job_token && <Link href={`/job/${c.job_token}`} target="_blank" className="flex min-h-10 items-center justify-between gap-3 rounded-sm font-medium text-indigo-700 hover:text-indigo-900 hover:underline">Craftsman job card <span>↗</span></Link>}
             </div>
           </Card>
         </div>
@@ -210,12 +221,18 @@ const euros = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function Field({ label, value, row = false }: { label: string; value: string; row?: boolean }) {
-  return row ? (
-    <div className="flex min-w-0 flex-col-reverse justify-end gap-1">
-      <dt className={meta}>{label}</dt>
-      <dd className="text-2xl leading-8 font-semibold tracking-tight text-indigo-700 tabular-nums">{value}</dd>
-    </div>
-  ) : (
+  if (row) {
+    const [count, ...unit] = value.split(" ");
+    return (
+      <div className="flex min-w-0 flex-col-reverse justify-end gap-2 border-indigo-100 px-5 py-4 even:border-l nth-[n+3]:border-t">
+        <dt className="text-xs font-medium text-slate-600">{label}</dt>
+        <dd className="text-sm font-medium text-indigo-800">
+          <span className="text-3xl leading-none font-semibold tracking-tight text-indigo-900 tabular-nums">{count}</span> {unit.join(" ")}
+        </dd>
+      </div>
+    );
+  }
+  return (
     <div className="min-w-0 space-y-1"><dt className={meta}>{label}</dt><dd className="font-medium wrap-anywhere text-slate-800">{value}</dd></div>
   );
 }

@@ -5,6 +5,21 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --text-sm--line-height: 1.5rem;
+
+  --color-indigo-50: #f0f2fa;
+  --color-indigo-100: #e3e7f6;
+  --color-indigo-200: #cad2ed;
+  --color-indigo-300: #a8b6df;
+  --color-indigo-400: #8192ce;
+  --color-indigo-500: #6274bb;
+  --color-indigo-600: #4658a7;
+  --color-indigo-700: #39498e;
+  --color-indigo-800: #303e78;
+  --color-indigo-900: #293561;
+  --color-slate-50: #f6f7f9;
+  --color-slate-500: #5e6c7e;
+  --color-slate-700: #394657;
+  --color-slate-950: #17212f;
 }
 
 html {
@@ -21,8 +36,213 @@ label:has(input[type="file"]:focus-visible) {
   outline-offset: 3px;
 }
 
+.workspace-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.workspace-tab:hover,
 body:has(.centrix-page) .nav-centrix,
 body:has(.line-page) .nav-line {
-  background-color: var(--color-indigo-50);
   color: var(--color-indigo-700);
+}
+
+body:has(.centrix-page) .nav-centrix::after,
+body:has(.line-page) .nav-line::after {
+  content: "";
+  position: absolute;
+  inset: auto 0.5rem -1px;
+  height: 3px;
+  background: currentColor;
+}
+
+/* A pair of connected doorways, used in the product and work-order headers. */
+.building-mark {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-bottom: 2px solid currentColor;
+}
+
+.building-mark::before,
+.building-mark::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 11px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+}
+
+.building-mark::before { inset-inline-start: 0; height: 12px; }
+.building-mark::after { inset-inline-end: 0; height: 18px; }
+
+/* Architectural elevation on the demo hub. */
+.building-elevation {
+  position: relative;
+  display: flex;
+  align-items: end;
+  padding: 0 12px;
+  border-bottom: 1px solid currentColor;
+  color: var(--color-indigo-300);
+}
+
+.building-elevation > span {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 8px);
+  gap: 7px 6px;
+  padding: 8px 8px 0;
+  border: 1px solid currentColor;
+  border-bottom: 0;
+}
+
+.building-elevation > span + span { margin-left: -1px; }
+.building-elevation > span:nth-child(2) {
+  grid-template-columns: repeat(4, 9px);
+  gap: 8px;
+  padding: 10px 10px 0;
+  color: var(--color-indigo-100);
+}
+.building-elevation > span::before {
+  content: "";
+  position: absolute;
+  inset: -4px -3px auto;
+  border-top: 1px solid currentColor;
+}
+.building-elevation > span > span {
+  height: 12px;
+  border: 1px solid currentColor;
+  border-bottom-width: 2px;
+}
+.building-elevation > span:nth-child(2) > span { height: 16px; }
+
+.entry-arrow {
+  position: relative;
+  display: inline-block;
+  width: 15px;
+  height: 10px;
+  flex: none;
+}
+.entry-arrow::before,
+.entry-arrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+}
+.entry-arrow::before { top: 4px; width: 15px; border-top: 1.5px solid; }
+.entry-arrow::after { top: 1px; width: 8px; height: 8px; border: solid; border-width: 1.5px 1.5px 0 0; transform: rotate(45deg); }
+
+.approval-amounts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-slate-500);
+  overflow-wrap: anywhere;
+}
+
+.approval-amounts b {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  color: var(--color-slate-950);
+}
+
+.voice-mark {
+  position: relative;
+  width: 2px;
+  height: 14px;
+  margin-inline: 4px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.voice-mark::before, .voice-mark::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  width: 2px;
+  height: 8px;
+  border-radius: inherit;
+  background: currentColor;
+}
+.voice-mark::before { left: -4px; }
+.voice-mark::after { left: 4px; }
+
+.calendar-mark {
+  position: relative;
+  width: 19px;
+  height: 18px;
+  flex: none;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+.calendar-mark::before {
+  content: "";
+  position: absolute;
+  inset: -3px 3px auto;
+  height: 4px;
+  border-inline: 2px solid currentColor;
+}
+.calendar-mark::after {
+  content: "";
+  position: absolute;
+  inset: 4px 0 auto;
+  border-top: 1px solid currentColor;
+}
+
+.repair-progress { display: grid; }
+.repair-progress li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 0.25rem;
+}
+.repair-progress li::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 7px;
+  border-left: 1px solid var(--color-slate-300);
+}
+.repair-progress li:first-child::before { top: 50%; }
+.repair-progress li:last-child::before { bottom: 50%; }
+.step-marker {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border: 1px solid var(--color-slate-500);
+  border-radius: 50%;
+  background: white;
+}
+.step-complete {
+  background: var(--color-emerald-700);
+  border-color: var(--color-emerald-700);
+}
+.step-complete::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 7px;
+  height: 4px;
+  border: solid white;
+  border-width: 0 0 1.5px 1.5px;
+  transform: rotate(-45deg);
+}
+@container (min-width: 17rem) {
+  .repair-progress { grid-template-columns: repeat(5, minmax(min-content, 1fr)); }
+  .repair-progress li { flex-direction: column; gap: 0.5rem; padding: 0; text-align: center; }
+  .repair-progress li::before { inset: 7px 0 auto; border: 0; border-top: 1px solid var(--color-slate-300); }
+  .repair-progress li:first-child::before { inset: 7px 0 auto 50%; }
+  .repair-progress li:last-child::before { inset: 7px 50% auto 0; }
 }
