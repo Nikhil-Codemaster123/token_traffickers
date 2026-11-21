@@ -82,8 +82,29 @@ export function JobCard({ token }: { token: string }) {
             {data.status === "stopped" && <p className="rounded-lg bg-rose-50 px-4 py-3 text-rose-800">This job was cancelled by the property manager.</p>}
           </header>
 
+          {data.accepted && (
+            <div className="-mx-5 space-y-3 border-y border-slate-200 bg-slate-50/65 px-5 py-4 sm:-mx-6 sm:px-6">
+              <div className="flex items-baseline justify-between gap-4"><span className={meta}>Flat</span><span className="font-mono text-xs">{data.flat}</span></div>
+              {data.tenant && (
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className={meta}>Tenant</span>
+                  <span className="min-w-0 text-right font-medium">{data.tenant.name}{data.tenant.phone && <> · <a href={`tel:${data.tenant.phone.replace(/\s/g, "")}`} className={`${linkClass} inline-flex min-h-11 items-center`}>{data.tenant.phone}</a></>}</span>
+                </div>
+              )}
+              <div className="flex items-baseline justify-between gap-4"><span className={meta}>Access</span><span className="min-w-0 text-right wrap-anywhere">{data.access_notes ?? "—"}</span></div>
+              {(data.photos ?? []).filter(Boolean).length > 0 && (
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                  {(data.photos ?? []).filter(Boolean).map((p) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={p!} src={p!} alt="Tenant photo" className="aspect-square w-full rounded-lg object-cover" />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {data.status === "scheduled" && (
-            <div className="space-y-3 border-t border-slate-100 pt-4">
+            <div className="space-y-3">
               <h2 className="text-sm font-semibold text-slate-900">Job done?</h2>
               <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="What you did (e.g. ignition electrode replaced)" className={`${inputClass} h-11 w-full`} />
               <label className={`${btn.secondary} relative w-full py-2 wrap-anywhere`}>
@@ -98,12 +119,15 @@ export function JobCard({ token }: { token: string }) {
             </div>
           )}
 
-          <div className="space-y-1 border-l-2 border-indigo-400 bg-indigo-50/50 px-4 py-3">
-            <div className="font-medium text-slate-900">{data.street}</div>
-            <div className="text-slate-600">
-              {data.building.heating} {data.building.fuel} heating · built {data.building.year} · {data.scope === "building" ? "whole building" : "one flat"}
+          <div className="flex items-start gap-4 border-y border-slate-200 py-4">
+            <span aria-hidden="true" className="building-mark mt-1 shrink-0 text-indigo-700" />
+            <div className="min-w-0 space-y-1">
+              <div className="font-semibold text-slate-950">{data.street}</div>
+              <div className="text-slate-600">
+                {data.building.heating} {data.building.fuel} heating · built {data.building.year} · {data.scope === "building" ? "whole building" : "one flat"}
+              </div>
+              <div className="font-medium text-indigo-800">{data.appointment}</div>
             </div>
-            <div className="font-medium text-indigo-800">{data.appointment}</div>
           </div>
 
           {data.status === "dispatched" && (
@@ -120,27 +144,6 @@ export function JobCard({ token }: { token: string }) {
                 </div>
               )}
               <p className="text-xs leading-5 text-slate-500">The tenant&apos;s name, phone and flat appear after you accept.</p>
-            </div>
-          )}
-
-          {data.accepted && (
-            <div className="space-y-3 border-t border-slate-100 pt-4 text-sm">
-              <div className="flex items-baseline justify-between gap-4"><span className={meta}>Flat</span><span>{data.flat}</span></div>
-              {data.tenant && (
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className={meta}>Tenant</span>
-                  <span className="min-w-0 text-right">{data.tenant.name}{data.tenant.phone && <> · <a href={`tel:${data.tenant.phone.replace(/\s/g, "")}`} className={`${linkClass} inline-flex min-h-11 items-center`}>{data.tenant.phone}</a></>}</span>
-                </div>
-              )}
-              <div className="flex items-baseline justify-between gap-4"><span className={meta}>Access</span><span className="min-w-0 text-right wrap-anywhere">{data.access_notes ?? "—"}</span></div>
-              {(data.photos ?? []).filter(Boolean).length > 0 && (
-                <div className="grid grid-cols-3 gap-2 pt-2">
-                  {(data.photos ?? []).filter(Boolean).map((p) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={p!} src={p!} alt="Tenant photo" className="aspect-square w-full rounded-lg object-cover" />
-                  ))}
-                </div>
-              )}
             </div>
           )}
 

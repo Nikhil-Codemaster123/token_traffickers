@@ -4,7 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { createElement, useEffect, useRef, useState } from "react";
 import { Timeline, type Ev } from "./Timeline";
-import { btn, Card, inputClass, linkClass, meta, StatusChip } from "./ui";
+import { btn, Card, inputClass, linkClass, meta, StatusChip, surface } from "./ui";
 import { post, usePoll } from "./usePoll";
 
 type Resident = { contact_id: string; name: string; unit_id: string | null; language: string | null };
@@ -28,20 +28,20 @@ export function CallLine({ agentId }: { agentId?: string }) {
 
   return (
     <div className="line-page mx-auto grid max-w-6xl items-start gap-6 px-4 py-8 sm:px-6 md:grid-cols-2 lg:px-8">
-      <Card
-        className="[&_h2]:text-2xl [&_h2]:leading-8 [&_h2]:tracking-tight"
-        title="Incoming call · property management line"
-        aside={
-          agentId ? (
+      <section className={`${surface} p-5 sm:p-6`}>
+        <header className="-mx-5 -mt-5 mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-t-2xl border-b border-indigo-100 bg-indigo-50/70 p-5 sm:-mx-6 sm:-mt-6 sm:p-6">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Incoming call <span className="text-sm font-normal tracking-normal text-slate-600">· property management line</span>
+          </h1>
+          {agentId ? (
             <button onClick={() => setMode(mode === "agent" ? "fallback" : "agent")} className={`${linkClass} min-h-10 cursor-pointer text-xs`}>
               {mode === "agent" ? "use fallback loop" : "use ElevenLabs agent"}
             </button>
           ) : (
             <span className="text-xs font-medium text-slate-500">fallback loop</span>
-          )
-        }
-      >
-        <label className="mb-4 block border-t border-slate-100 pt-4">
+          )}
+        </header>
+        <label className="mb-4 block">
           <span className={meta}>Caller (matched by phone number)</span>
           <select value={contactId} onChange={(e) => setContactId(e.target.value)} className={`${inputClass} mt-2 h-10 w-full`}>
             {residents.length === 0 && <option value="c_203">Jonas Weber · unit_2a</option>}
@@ -52,7 +52,7 @@ export function CallLine({ agentId }: { agentId?: string }) {
           </select>
         </label>
         {mode === "agent" && agentId ? <AgentWidget key={contactId} agentId={agentId} contactId={contactId} /> : <VoiceLoop key={contactId} contactId={contactId} />}
-      </Card>
+      </section>
       <LiveCase contactId={contactId} />
     </div>
   );
@@ -62,7 +62,7 @@ function AgentWidget({ agentId, contactId }: { agentId: string; contactId: strin
   return (
     <div className="space-y-3">
       <Script src="https://unpkg.com/@elevenlabs/convai-widget-embed" strategy="afterInteractive" />
-      <p className="border-l-2 border-indigo-300 bg-indigo-50/50 px-4 py-3">Start the call in the ElevenLabs widget. Its tools write into centrix live (right).</p>
+      <p className="border-t border-slate-200 pt-4 text-pretty">Start the call in the ElevenLabs widget. Its tools write into centrix live (right).</p>
       {createElement("elevenlabs-convai", {
         "agent-id": agentId,
         "dynamic-variables": JSON.stringify({ contact_id: contactId }),
@@ -200,7 +200,7 @@ function VoiceLoop({ contactId }: { contactId: string }) {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         {!live ? (
-          <button onClick={start} className={btn.success}>Call the line</button>
+          <button onClick={start} className={btn.success}><span aria-hidden="true" className="voice-mark" />Call the line</button>
         ) : (
           <>
             <button onClick={listen} disabled={busy || listening} className={btn.primary}>{listening ? "Listening…" : "Speak"}</button>
@@ -214,11 +214,11 @@ function VoiceLoop({ contactId }: { contactId: string }) {
         {busy && <span className="text-sm text-slate-500">agent is thinking…</span>}
       </div>
 
-      <div className="max-h-80 min-h-24 space-y-3 overflow-y-auto rounded-lg bg-slate-50 p-4">
-        {msgs.length === 0 && <p className="text-sm text-slate-500">Press “Call the line”, then talk (Chrome) or type.</p>}
+      <div className="max-h-80 space-y-3 overflow-y-auto border-t border-slate-200 pt-4">
+        {msgs.length === 0 && <p className="text-sm text-pretty text-slate-600">Press “Call the line”, then talk (Chrome) or type.</p>}
         {msgs.map((m, i) => (
           <div key={i} className={`flex ${m.who === "caller" ? "justify-end" : "justify-start"}`}>
-            <p className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-white text-slate-800 shadow-xs"}`}>{m.text}</p>
+            <p className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-slate-50 text-slate-800"}`}>{m.text}</p>
           </div>
         ))}
       </div>
@@ -272,7 +272,7 @@ function LiveCase({ contactId }: { contactId: string }) {
         <p className="text-sm text-slate-500">No case for this caller yet.</p>
       ) : (
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3 text-sm">
+          <div className="-mx-5 mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-y border-slate-100 bg-slate-50/60 px-5 py-3 text-sm sm:-mx-6 sm:px-6">
             <StatusChip status={latest.status} />
             <span className="text-slate-600">{latest.unit_id}{latest.scope === "building" ? " · whole building" : ""}</span>
             {latest.partner_name && <span className="text-slate-600">· {latest.partner_name}</span>}

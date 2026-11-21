@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { fmtDay, fmtTime } from "@/lib/time";
-import { meta, StatusChip, Spinner, surface } from "./ui";
+import { meta, recordLabel, StatusChip, Spinner, surface } from "./ui";
 import { usePoll } from "./usePoll";
 
 type CaseItem = {
@@ -33,12 +33,12 @@ export function Inbox() {
 
   return (
     <div className="centrix-page mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-indigo-700">centrix · mock</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-950">Musterstraße 12, 52062 Aachen</h1>
+      <header className="grid items-center gap-6 md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+        <div className="space-y-3">
+          <p className={recordLabel}>centrix · mock</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-balance text-slate-950">Musterstraße 12, 52062 Aachen</h1>
         </div>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] gap-6">
           <Kpi label="Open cases" value={open.length} />
           <Kpi label="Sent to a firm automatically" value={auto.length} />
         </div>
@@ -48,26 +48,33 @@ export function Inbox() {
       {!data && !error && <Spinner />}
 
       {data && (
-        <div className={`${surface} overflow-x-auto`}>
+        <div className={`${surface} @container overflow-x-auto`}>
           <table className="w-full min-w-[44rem] table-fixed text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50/80 text-xs uppercase tracking-wide text-slate-500 [&_th]:py-3 [&_th]:font-medium">
+            <thead className="border-b border-slate-200 bg-slate-50/80 text-xs uppercase tracking-wide text-slate-600 [&_th]:py-3 [&_th]:font-medium">
               <tr>
-                <th className="w-[22%] pr-3 pl-5 sm:pl-6">Unit · tenant</th>
-                <th className="w-[22%] px-3">Problem</th>
-                <th className="w-[24%] px-3">Firm · appointment</th>
-                <th className="w-36 px-3">Status</th>
+                <th className="w-[20%] pr-3 pl-5 sm:pl-6">Unit · tenant</th>
+                <th className="w-[26%] px-3">Problem</th>
+                <th className="w-[23%] px-3">Firm · appointment</th>
+                <th className="w-38 px-3">Status</th>
                 <th className="pr-5 pl-3 text-right sm:pr-6">Opened</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {cases.length === 0 && (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">No cases yet. Call the line to open one.</td></tr>
+                <tr>
+                  <td colSpan={5}>
+                    <div className="sticky left-0 flex w-[100cqw] flex-col items-center gap-3 px-5 py-10 text-center text-slate-600">
+                      <span aria-hidden="true" className="building-mark text-indigo-500" />
+                      No cases yet. Call the line to open one.
+                    </div>
+                  </td>
+                </tr>
               )}
               {cases.map((c) => (
-                <tr key={c.case_id} className="align-top transition-colors hover:bg-slate-50">
+                <tr key={c.case_id} className="align-top transition-colors hover:bg-indigo-50/50 focus-within:bg-indigo-50/50">
                   <td className="space-y-1 py-4 pr-3 pl-5 sm:pl-6">
-                    <Link href={`/centrix/case/${c.case_id}`} className="rounded-sm font-semibold text-indigo-700 hover:underline hover:underline-offset-4">
-                      {c.unit_id ?? "—"}{c.scope === "building" ? " · whole building" : ""}
+                    <Link href={`/centrix/case/${c.case_id}`} className="rounded-sm font-medium text-indigo-700 hover:underline hover:underline-offset-4">
+                      <span className="font-mono text-[13px] font-semibold">{c.unit_id ?? "—"}</span>{c.scope === "building" ? " · whole building" : ""}
                     </Link>
                     <div className="text-xs leading-5 text-slate-500">
                       {c.contact_name}{c.reporters.length > 1 ? ` +${c.reporters.length - 1} more` : ""}
@@ -82,7 +89,7 @@ export function Inbox() {
                     <div className="text-xs leading-5 text-slate-500">{c.appointment}</div>
                   </td>
                   <td className="px-3 py-4"><StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} /></td>
-                  <td className="py-4 pr-5 pl-3 text-right text-xs leading-6 text-slate-500 sm:pr-6">{fmtDay(c.created_at)}, {fmtTime(c.created_at)}</td>
+                  <td className="py-4 pr-5 pl-3 text-right text-xs leading-5 text-slate-500 sm:pr-6">{fmtDay(c.created_at)}, <span className="font-mono">{fmtTime(c.created_at)}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -95,8 +102,8 @@ export function Inbox() {
 
 function Kpi({ label, value }: { label: string; value: number }) {
   return (
-    <div className={`${surface} flex flex-col-reverse justify-between gap-3 p-5 sm:p-6`}>
-      <div className="text-3xl leading-none font-semibold tracking-tight text-slate-950 tabular-nums">{value}</div>
+    <div className={`${surface} flex h-full flex-col gap-2 p-5 lg:p-6`}>
+      <div className="text-3xl leading-none font-semibold tracking-tight text-indigo-900 tabular-nums">{value}</div>
       <div className={meta}>{label}</div>
     </div>
   );
