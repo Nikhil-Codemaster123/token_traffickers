@@ -117,10 +117,11 @@ export async function runTool(name: string, args: Args, contactId?: string): Pro
       if (!contact_id) throw new Error("contact_id missing");
       return tools.openCase({
         contact_id,
-        category: str(args.category),
-        scope: str(args.scope) as "unit" | "building" | undefined,
+        // Voice agents send free text ("Heating", "heating system", "Whole building", "urgent"): normalise it
+        category: /heat|hvac|boiler|radiator|hot water|heiz/i.test(String(args.category ?? "heating")) ? "heating" : "other",
+        scope: /build|whole|all|geb/i.test(String(args.scope ?? "")) ? "building" : "unit",
         symptoms: str(args.symptoms) ?? "Heating problem",
-        urgency: str(args.urgency) as "low" | "normal" | "high" | undefined,
+        urgency: /high|urgent|emergency|dringend/i.test(String(args.urgency ?? "")) ? "high" : /low|niedrig/i.test(String(args.urgency ?? "")) ? "low" : "normal",
         safety_flags: (args.safety_flags as string | string[] | undefined) ?? "",
         availability_note: str(args.availability_note),
       });
