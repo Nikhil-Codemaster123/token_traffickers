@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { fmtTime } from "@/lib/time";
 import { Timeline, type Ev } from "./Timeline";
-import { btn, Card, linkClass, meta, recordLabel, Spinner, StatusChip } from "./ui";
+import { btn, Card, CentrixHeader, EmptyState, Icon, iconTile, linkClass, meta, OfferLimitBar, pageWidth, Spinner, StatusChip, surface } from "./ui";
 import { post, usePoll } from "./usePoll";
 
 type Doc = { document_id: string; type: string; file_url: string | null; number: string | null; amount_eur: number | null; billed_to: string | null };
@@ -63,8 +63,22 @@ export function CaseView({ id }: { id: string }) {
     }
   }
 
-  if (error && !data) return <div className="centrix-page mx-auto max-w-6xl px-4 py-8 text-rose-800 sm:px-6 lg:px-8">{error}</div>;
-  if (!data) return <div className="centrix-page mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8"><Spinner /></div>;
+  if (error && !data) return (
+    <div className="centrix-page">
+      <CentrixHeader caseId={id} />
+      <div className={`${pageWidth} py-8`}>
+        <p className="rounded-xl bg-rose-50 px-4 py-3 text-rose-800 ring-1 ring-rose-200 ring-inset">{error}</p>
+      </div>
+    </div>
+  );
+  if (!data) return (
+    <div className="centrix-page">
+      <CentrixHeader caseId={id} />
+      <div className={`${pageWidth} py-8`}>
+        <div className={`${surface} p-5`}><Spinner /></div>
+      </div>
+    </div>
+  );
 
   const c = data.case;
   const offer = data.documents.find((d) => d.document_id === c.offer_document_id);
@@ -72,144 +86,160 @@ export function CaseView({ id }: { id: string }) {
   const photos = data.documents.filter((d) => d.type === "photo" && d.file_url);
 
   return (
-    <div className="centrix-page mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-slate-200 pb-3">
-          <Link href="/centrix" className="rounded-sm text-sm font-medium text-indigo-700 hover:underline hover:underline-offset-4">← Inbox</Link>
-          <p className={recordLabel}>centrix · mock · <span className="font-mono font-normal tracking-normal text-slate-500 normal-case">{c.case_id}</span></p>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="min-w-0 space-y-1 wrap-anywhere">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-              {c.unit_id}{c.scope === "building" ? " · whole building" : ""} · <span className="capitalize">{c.category}</span>
-            </h1>
-            <p className="text-sm leading-6 text-slate-600">
-              {data.property.address}, {data.property.postcode} {data.property.city} · {data.property.heating} {data.property.fuel} heating, built {data.property.building_year}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} />
-            {STOPPABLE.includes(c.status) && (
-              <button disabled={busy} onClick={() => act("stop")} className={btn.danger}>Stop dispatch</button>
-            )}
-          </div>
-        </div>
-      </header>
-      {actionError && <p className="mb-6 rounded-lg bg-rose-50 px-4 py-3 text-rose-800">{actionError}</p>}
-
-      <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]">
-        <div className="min-w-0 space-y-6">
-          <Card title="Reported by the tenant" aside={<span className="text-xs text-slate-500">{fmtTime(c.created_at)} · by phone</span>}>
-            <p className="text-pretty wrap-anywhere text-slate-800">{c.symptoms}</p>
-            <dl className="-mx-5 mt-5 -mb-5 grid grid-cols-2 gap-x-4 gap-y-3 rounded-b-2xl border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:-mx-6 sm:-mb-6 sm:grid-cols-3 sm:px-6">
-              <Field label="Tenant" value={data.contact ? `${data.contact.name}${c.reporters.length > 1 ? ` +${c.reporters.length - 1}` : ""}` : "—"} />
-              <Field label="Urgency" value={c.urgency} />
-              <Field label="Home" value={c.availability_note ?? "—"} />
-              {c.safety_flags.length > 0 && <Field label="Safety" value={c.safety_flags.join(", ")} />}
-            </dl>
-          </Card>
-
-          <Card title="Timeline" aside={<span className="text-xs text-slate-500">every call, message and change, on the unit</span>}>
-            <Timeline events={data.events} />
-          </Card>
-
-          {Boolean(c.result) && (
-            <Card title="Written back to centrix" aside={<span className="text-xs text-slate-500">unit · contact · case</span>}>
-              <pre className="overflow-x-auto rounded-lg bg-slate-50 p-4 text-xs leading-5 text-slate-700">{JSON.stringify(c.result, null, 2)}</pre>
-            </Card>
-          )}
-        </div>
-
-        <div className="min-w-0 space-y-6">
-          <Card title="Effort for this repair">
-            <dl className="-mx-5 -mb-5 grid grid-cols-2 overflow-hidden rounded-b-2xl border-t border-indigo-100 bg-indigo-50/60 sm:-mx-6 sm:-mb-6">
-              <Field row label={data.effort.tenant_calls > 1 ? "Tenants" : "Tenant"} value={plural(data.effort.tenant_calls, "call")} />
-              <Field row label="Craftsman" value={plural(data.effort.craftsman_taps, "tap")} />
-              <Field row label="Property manager" value={plural(data.effort.manager_clicks, "click")} />
-              <Field row label="Owner" value={plural(data.effort.owner_clicks, "click")} />
-            </dl>
-          </Card>
-
-          <Card title="Firm">
-            {data.partner ? (
-              <>
-                <div className="font-medium text-slate-900">{data.partner.name}</div>
-                <div className="mt-1 text-sm text-slate-600">{data.appointment || "no slot yet"}</div>
-                <ul className="mt-3 space-y-3 border-t border-slate-100 pt-3">
-                  {c.pick_reasons.map((r) => <li key={r} className="flex gap-3"><span className="font-medium text-indigo-700">✓</span>{r}</li>)}
-                </ul>
-              </>
-            ) : (
-              <p className="text-sm text-slate-500">Not picked yet.</p>
-            )}
-          </Card>
-
-          <Card title="Approval">
-            {offer ? (
-              <p className="approval-amounts">
-                <span>Offer {offer.number} <b>{euros.format(Number(offer.amount_eur))}</b></span>
-                <span> · </span>
-                <span>owner&apos;s limit <b>{euros.format(c.offer_approval_limit_eur ?? data.approval_limit_eur)}</b></span>
+    <div className="centrix-page">
+      <CentrixHeader caseId={c.case_id} />
+      <div className={`${pageWidth} space-y-6 py-4 sm:pb-8`}>
+        <header className="space-y-2">
+          <Link href="/centrix" className="inline-flex min-h-11 items-center rounded-lg px-2 -ml-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 active:bg-indigo-100 motion-safe:transition-colors motion-safe:duration-150">← Inbox</Link>
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+            <div className="min-w-0 flex-[1_1_25rem] space-y-2 wrap-anywhere">
+              <h1 className="text-2xl leading-tight font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                {c.unit_id}{c.scope === "building" ? " · whole building" : ""} · <span className="capitalize">{c.category}</span>
+              </h1>
+              <p className="text-sm leading-6 text-slate-600">
+                {data.property.address}, {data.property.postcode} {data.property.city} · {data.property.heating} {data.property.fuel} heating, built {data.property.building_year}
               </p>
-            ) : c.estimated_cost_eur === null ? (
-              <p className="text-sm text-slate-500">No estimate yet.</p>
-            ) : (
-              <p className="approval-amounts">
-                <span>Estimate <b>€{c.estimated_cost_eur}</b></span>
-                <span> · </span>
-                <span>owner&apos;s limit <b>€{data.approval_limit_eur}</b></span>
-              </p>
-            )}
-            {c.approval === "owner" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Approved by the owner.</p>}
-            {offer && Number(offer.amount_eur) <= (c.offer_approval_limit_eur ?? data.approval_limit_eur) && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Within the limit. The firm can go ahead.</p>}
-            {!offer && c.approval === "auto" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Under the limit: sent to the firm automatically.</p>}
-            {!offer && c.approval === "manager" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Approved by the manager.</p>}
-            {c.status === "awaiting_approval" && (
-              <div className="mt-3 space-y-3">
-                <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Above the limit: the owner has to agree first.</p>
-                <button disabled={busy} onClick={() => act("approve")} className={btn.primary}>Owner agreed: approve</button>
-              </div>
-            )}
-          </Card>
-
-          <Card title="Documents">
-            {!offer && !invoice && photos.length === 0 && <p className="text-sm text-slate-500">None yet.</p>}
-            {offer?.file_url && <div className="mb-3"><a href={offer.file_url} target="_blank" rel="noreferrer" className={linkClass}>Open offer {offer.number}</a></div>}
-            {invoice && (
-              <div className="space-y-1">
-                <div className="font-medium text-slate-900">Invoice {invoice.number ?? "(no number)"}</div>
-                <div className="text-slate-600">
-                  {invoice.amount_eur !== null ? `€${Number(invoice.amount_eur).toFixed(2)}` : "amount unread"} · billed to {invoice.billed_to === "reltix" ? "Reltix" : "the owner"}
-                </div>
-                {invoice.file_url && <a href={invoice.file_url} target="_blank" rel="noreferrer" className={linkClass}>Open file</a>}
-              </div>
-            )}
-            {photos.length > 0 && (
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                {photos.map((p) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <a key={p.document_id} href={p.file_url!} target="_blank" rel="noreferrer"><img src={p.file_url!} alt="Tenant photo" className="aspect-square w-full rounded-lg object-cover" /></a>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          <Card title="Data sharing">
-            {data.consent ? (
-              <p className="text-sm text-slate-700">
-                Told by {data.consent.channel === "voice" ? "phone" : data.consent.channel} at {fmtTime(data.consent.given_at)}: {data.consent.data_shared.join(", ")} go to the firm for this repair (basis: {data.consent.legal_basis}).
-              </p>
-            ) : (
-              <p className="text-sm text-slate-500">Not logged yet.</p>
-            )}
-          </Card>
-
-          <Card title="Demo shortcuts">
-            <div className="divide-y divide-slate-100">
-              <Link href={`/portal/${c.case_id}`} target="_blank" className="flex min-h-10 items-center justify-between gap-3 rounded-sm font-medium text-indigo-700 hover:text-indigo-900 hover:underline">Tenant portal <span>↗</span></Link>
-              {c.job_token && <Link href={`/job/${c.job_token}`} target="_blank" className="flex min-h-10 items-center justify-between gap-3 rounded-sm font-medium text-indigo-700 hover:text-indigo-900 hover:underline">Craftsman job card <span>↗</span></Link>}
             </div>
-          </Card>
+            <div className="flex flex-wrap items-center gap-3">
+              <StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} />
+              {STOPPABLE.includes(c.status) && (
+                <button disabled={busy} onClick={() => act("stop")} className={btn.danger}>Stop dispatch</button>
+              )}
+            </div>
+          </div>
+        </header>
+        {actionError && <p className="rounded-xl bg-rose-50 px-4 py-3 text-rose-800 ring-1 ring-rose-200 ring-inset">{actionError}</p>}
+
+        <RepairJourney
+          status={c.status}
+          resumeStatus={c.offer_resume_status}
+          hasOffer={Boolean(offer)}
+          ownerApproved={c.approval === "owner"}
+          events={data.events}
+        />
+
+        <Card title={<span className="flex items-center gap-3"><span className={iconTile}><Icon name="activity" /></span>Effort for this repair</span>} className="bg-linear-to-br from-white via-white to-indigo-100/75">
+          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+            <Field row label={data.effort.tenant_calls > 1 ? "Tenants" : "Tenant"} value={plural(data.effort.tenant_calls, "call")} />
+            <Field row label="Craftsman" value={plural(data.effort.craftsman_taps, "tap")} />
+            <Field row label="Property manager" value={plural(data.effort.manager_clicks, "click")} />
+            <Field row label="Owner" value={plural(data.effort.owner_clicks, "click")} />
+          </dl>
+        </Card>
+
+        <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]">
+          <div className="min-w-0 space-y-6">
+            <Card title="Reported by the tenant" aside={<span className="text-xs text-slate-500">{fmtTime(c.created_at)} · by phone</span>}>
+              <p className="text-pretty wrap-anywhere text-slate-800">{c.symptoms}</p>
+              <dl className="mt-5 grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-900/5 sm:grid-cols-3">
+                <Field label="Tenant" value={data.contact ? `${data.contact.name}${c.reporters.length > 1 ? ` +${c.reporters.length - 1}` : ""}` : "—"} />
+                <Field label="Urgency" value={c.urgency} />
+                <Field label="Home" value={c.availability_note ?? "—"} />
+                {c.safety_flags.length > 0 && <Field label="Safety" value={c.safety_flags.join(", ")} />}
+              </dl>
+            </Card>
+
+            <Card title="Timeline" aside={<span className="text-xs text-slate-500">every call, message and change, on the unit</span>}>
+              <Timeline events={data.events} />
+            </Card>
+
+            {Boolean(c.result) && (
+              <Card title="Written back to centrix" aside={<span className="text-xs text-slate-500">unit · contact · case</span>}>
+                <pre className="overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-700 ring-1 ring-slate-900/5">{JSON.stringify(c.result, null, 2)}</pre>
+              </Card>
+            )}
+          </div>
+
+          <div className="min-w-0 space-y-6">
+            <Card title="Firm">
+              {data.partner ? (
+                <>
+                  <div className="flex items-start gap-3 rounded-xl bg-indigo-50/70 p-3">
+                    <span className={iconTile}><Icon name="calendar" /></span>
+                    <div className="min-w-0 wrap-anywhere">
+                      <div className="font-semibold text-slate-950">{data.partner.name}</div>
+                      <div className="text-sm text-slate-600">{data.appointment || "no slot yet"}</div>
+                    </div>
+                  </div>
+                  <ul className="mt-4 space-y-2">
+                    {c.pick_reasons.map((r) => <li key={r} className="flex gap-3 wrap-anywhere"><span className="font-semibold text-indigo-700">✓</span>{r}</li>)}
+                  </ul>
+                </>
+              ) : (
+                <EmptyState>Not picked yet.</EmptyState>
+              )}
+            </Card>
+
+            <Card title="Approval">
+              {offer ? (
+                <div className="space-y-4 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-900/5">
+                  <p className="approval-amounts">
+                    <span>Offer {offer.number} <b>{euros.format(Number(offer.amount_eur))}</b></span>
+                    <span> · </span>
+                    <span>owner&apos;s limit <b>{euros.format(c.offer_approval_limit_eur ?? data.approval_limit_eur)}</b></span>
+                  </p>
+                  <OfferLimitBar amount={Number(offer.amount_eur)} limit={c.offer_approval_limit_eur ?? data.approval_limit_eur} />
+                </div>
+              ) : c.estimated_cost_eur === null ? (
+                <EmptyState>No estimate yet.</EmptyState>
+              ) : (
+                <p className="approval-amounts rounded-xl bg-slate-50 p-3 ring-1 ring-slate-900/5">
+                  <span>Estimate <b>€{c.estimated_cost_eur}</b></span>
+                  <span> · </span>
+                  <span>owner&apos;s limit <b>€{data.approval_limit_eur}</b></span>
+                </p>
+              )}
+              {c.approval === "owner" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Approved by the owner.</p>}
+              {offer && Number(offer.amount_eur) <= (c.offer_approval_limit_eur ?? data.approval_limit_eur) && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Within the limit. The firm can go ahead.</p>}
+              {!offer && c.approval === "auto" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Under the limit: sent to the firm automatically.</p>}
+              {!offer && c.approval === "manager" && <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Approved by the manager.</p>}
+              {c.status === "awaiting_approval" && (
+                <div className="mt-3 space-y-3">
+                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Above the limit: the owner has to agree first.</p>
+                  <button disabled={busy} onClick={() => act("approve")} className={`${btn.primary} w-full`}>Owner agreed: approve</button>
+                </div>
+              )}
+            </Card>
+
+            <Card title="Documents">
+              {!offer && !invoice && photos.length === 0 && <EmptyState>None yet.</EmptyState>}
+              {offer?.file_url && <div className="mb-3"><a href={offer.file_url} target="_blank" rel="noreferrer" className={`${linkClass} inline-flex min-h-11 items-center gap-2 wrap-anywhere`}><Icon name="document" />Open offer {offer.number}</a></div>}
+              {invoice && (
+                <div className="space-y-1">
+                  <div className="font-medium text-slate-900">Invoice {invoice.number ?? "(no number)"}</div>
+                  <div className="text-slate-600">
+                    {invoice.amount_eur !== null ? `€${Number(invoice.amount_eur).toFixed(2)}` : "amount unread"} · billed to {invoice.billed_to === "reltix" ? "Reltix" : "the owner"}
+                  </div>
+                  {invoice.file_url && <a href={invoice.file_url} target="_blank" rel="noreferrer" className={`${linkClass} inline-flex min-h-11 items-center gap-2`}><Icon name="document" />Open file</a>}
+                </div>
+              )}
+              {photos.length > 0 && (
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {photos.map((p) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <a key={p.document_id} href={p.file_url!} target="_blank" rel="noreferrer"><img src={p.file_url!} alt="Tenant photo" className="aspect-square w-full rounded-lg object-cover" /></a>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            <Card title="Data sharing">
+              {data.consent ? (
+                <p className="text-sm text-slate-700">
+                  Told by {data.consent.channel === "voice" ? "phone" : data.consent.channel} at {fmtTime(data.consent.given_at)}: {data.consent.data_shared.join(", ")} go to the firm for this repair (basis: {data.consent.legal_basis}).
+                </p>
+              ) : (
+                <EmptyState>Not logged yet.</EmptyState>
+              )}
+            </Card>
+
+            <Card title="Demo shortcuts">
+              <div className="divide-y divide-slate-100">
+                <Link href={`/portal/${c.case_id}`} target="_blank" className="flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 font-semibold text-indigo-700 hover:bg-indigo-50 active:bg-indigo-100 motion-safe:transition-colors motion-safe:duration-150">Tenant portal <span>↗</span></Link>
+                {c.job_token && <Link href={`/job/${c.job_token}`} target="_blank" className="flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 font-semibold text-indigo-700 hover:bg-indigo-50 active:bg-indigo-100 motion-safe:transition-colors motion-safe:duration-150">Craftsman job card <span>↗</span></Link>}
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
@@ -220,14 +250,61 @@ const euros = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
+const repairStage: Record<string, number> = {
+  booked: 1, dispatched: 1, awaiting_approval: 1, scheduled: 2,
+  completed: 3, reopened: 3, closed: 4,
+};
+
+function RepairJourney({ status, resumeStatus, hasOffer, ownerApproved, events }: {
+  status: string;
+  resumeStatus: string | null;
+  hasOffer: boolean;
+  ownerApproved: boolean;
+  events: Ev[];
+}) {
+  let reached = repairStage[resumeStatus ?? status] ?? 0;
+  if (status === "stopped") {
+    if (events.some((e) => e.type === "job.accepted")) reached = 2;
+    else if (events.some((e) => e.type === "slot.booked" || e.type === "job.dispatched")) reached = 1;
+  }
+
+  const waiting = status === "awaiting_approval" && hasOffer && !!resumeStatus;
+  const interrupted = ["stopped", "emergency", "reopened"].includes(status);
+  const steps = [
+    { label: "Reported", icon: "phone", done: true, active: reached === 0 },
+    { label: "Firm booked", icon: "calendar", done: reached >= 1, active: reached === 1 },
+    { label: "Accepted", icon: "clipboard", done: reached >= 2, active: reached === 2 && !waiting },
+    ...(hasOffer ? [{ label: "Owner approval", icon: "shield" as const, done: ownerApproved, active: waiting }] : []),
+    { label: "Done", icon: "wrench", done: reached >= 3, active: reached === 3 },
+    { label: "Confirmed", icon: "user", done: reached >= 4, active: reached === 4 },
+  ] as const;
+
+  return (
+    <ol className={`${surface} flex flex-col px-4 py-4 sm:flex-row sm:px-6`}>
+      {steps.map(({ label, icon, done, active }) => {
+        const current = active && !interrupted;
+        const skipped = icon === "shield" && !ownerApproved && !resumeStatus;
+        return (
+          <li key={label} aria-current={current ? "step" : undefined} aria-label={skipped ? `${label} (within the limit)` : done ? `${label} (complete)` : undefined} className={`relative flex min-w-0 items-center gap-3 pb-2 before:absolute before:top-4 before:left-[15px] before:h-full before:w-px last:pb-0 last:before:hidden sm:flex-1 sm:flex-col sm:gap-2 sm:px-1 sm:pb-0 sm:text-center sm:before:left-1/2 sm:before:h-px sm:before:w-full ${done || skipped ? "before:bg-indigo-200" : "before:bg-slate-200"}`}>
+            <span className={`relative grid size-8 shrink-0 place-items-center rounded-full ring-1 ring-inset ${current && waiting ? "bg-amber-50 text-amber-800 ring-amber-300" : done ? "bg-indigo-50 text-indigo-700 ring-indigo-200" : "bg-white text-slate-500 ring-slate-300"} ${current ? "outline-2 outline-offset-2 outline-indigo-400" : ""}`}>
+              {skipped ? <span aria-hidden="true" className="h-px w-2 bg-current" /> : <Icon name={done ? "check" : icon} />}
+            </span>
+            <span className={`text-xs leading-4 ${done || current ? "font-semibold text-slate-900" : "text-slate-500"}`}>{label}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function Field({ label, value, row = false }: { label: string; value: string; row?: boolean }) {
   if (row) {
     const [count, ...unit] = value.split(" ");
     return (
-      <div className="flex min-w-0 flex-col-reverse justify-end gap-2 border-indigo-100 px-5 py-4 even:border-l nth-[n+3]:border-t">
-        <dt className="text-xs font-medium text-slate-600">{label}</dt>
-        <dd className="text-sm font-medium text-indigo-800">
-          <span className="text-3xl leading-none font-semibold tracking-tight text-indigo-900 tabular-nums">{count}</span> {unit.join(" ")}
+      <div className="flex min-w-0 flex-col-reverse justify-end gap-2 rounded-xl bg-white/80 px-3 py-4 ring-1 ring-indigo-900/10 sm:px-4">
+        <dt className={meta}>{label}</dt>
+        <dd className="text-sm leading-5 font-medium text-indigo-800">
+          <span className="text-3xl leading-none font-semibold tracking-tight text-indigo-900 tabular-nums sm:text-[2.5rem]">{count}</span> {unit.join(" ")}
         </dd>
       </div>
     );

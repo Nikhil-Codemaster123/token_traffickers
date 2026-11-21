@@ -6,18 +6,19 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --text-sm--line-height: 1.5rem;
 
-  --color-indigo-50: #f0f2fa;
-  --color-indigo-100: #e3e7f6;
-  --color-indigo-200: #cad2ed;
-  --color-indigo-300: #a8b6df;
-  --color-indigo-400: #8192ce;
-  --color-indigo-500: #6274bb;
-  --color-indigo-600: #4658a7;
-  --color-indigo-700: #39498e;
-  --color-indigo-800: #303e78;
-  --color-indigo-900: #293561;
-  --color-slate-50: #f6f7f9;
-  --color-slate-500: #5e6c7e;
+  --color-indigo-50: #f2f1fc;
+  --color-indigo-100: #e9e5fb;
+  --color-indigo-200: #d9d3f5;
+  --color-indigo-300: #bcb2eb;
+  --color-indigo-400: #9788dd;
+  --color-indigo-500: #6958c5;
+  --color-indigo-600: #5143ad;
+  --color-indigo-700: #453797;
+  --color-indigo-800: #362a77;
+  --color-indigo-900: #2c2456;
+  --color-slate-50: #f7f8fa;
+  --color-slate-400: #8290a6;
+  --color-slate-500: #546277;
   --color-slate-700: #394657;
   --color-slate-950: #17212f;
 }
@@ -28,6 +29,7 @@ html {
 
 body {
   font-family: var(--font-sans);
+  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #eae6f987, transparent), linear-gradient(#faf9fc, #f7f8fa 36rem);
 }
 
 :where(a, button, input, select, textarea):focus-visible,
@@ -55,31 +57,10 @@ body:has(.line-page) .nav-line::after {
   content: "";
   position: absolute;
   inset: auto 0.5rem -1px;
-  height: 3px;
+  height: 2px;
+  border-radius: 999px;
   background: currentColor;
 }
-
-/* A pair of connected doorways, used in the product and work-order headers. */
-.building-mark {
-  position: relative;
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-bottom: 2px solid currentColor;
-}
-
-.building-mark::before,
-.building-mark::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 11px;
-  border: 2px solid currentColor;
-  border-bottom: 0;
-}
-
-.building-mark::before { inset-inline-start: 0; height: 12px; }
-.building-mark::after { inset-inline-end: 0; height: 18px; }
 
 /* Architectural elevation on the demo hub. */
 .building-elevation {
@@ -157,48 +138,6 @@ body:has(.line-page) .nav-line::after {
   color: var(--color-slate-950);
 }
 
-.voice-mark {
-  position: relative;
-  width: 2px;
-  height: 14px;
-  margin-inline: 4px;
-  border-radius: 2px;
-  background: currentColor;
-}
-.voice-mark::before, .voice-mark::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  width: 2px;
-  height: 8px;
-  border-radius: inherit;
-  background: currentColor;
-}
-.voice-mark::before { left: -4px; }
-.voice-mark::after { left: 4px; }
-
-.calendar-mark {
-  position: relative;
-  width: 19px;
-  height: 18px;
-  flex: none;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
-}
-.calendar-mark::before {
-  content: "";
-  position: absolute;
-  inset: -3px 3px auto;
-  height: 4px;
-  border-inline: 2px solid currentColor;
-}
-.calendar-mark::after {
-  content: "";
-  position: absolute;
-  inset: 4px 0 auto;
-  border-top: 1px solid currentColor;
-}
-
 .repair-progress { display: grid; }
 .repair-progress li {
   position: relative;
@@ -210,39 +149,39 @@ body:has(.line-page) .nav-line::after {
 .repair-progress li::before {
   content: "";
   position: absolute;
-  inset: 0 auto 0 7px;
+  inset: 0 auto 0 9px;
   border-left: 1px solid var(--color-slate-300);
 }
 .repair-progress li:first-child::before { top: 50%; }
 .repair-progress li:last-child::before { bottom: 50%; }
 .step-marker {
   position: relative;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   flex: none;
   border: 1px solid var(--color-slate-500);
   border-radius: 50%;
   background: white;
 }
 .step-complete {
-  background: var(--color-emerald-700);
-  border-color: var(--color-emerald-700);
+  background: var(--color-indigo-600);
+  border-color: var(--color-indigo-600);
 }
 .step-complete::after {
   content: "";
   position: absolute;
-  top: 4px;
-  left: 3px;
-  width: 7px;
-  height: 4px;
+  top: 5px;
+  left: 4px;
+  width: 10px;
+  height: 6px;
   border: solid white;
   border-width: 0 0 1.5px 1.5px;
   transform: rotate(-45deg);
 }
-@container (min-width: 17rem) {
-  .repair-progress { grid-template-columns: repeat(5, minmax(min-content, 1fr)); }
+@container (min-width: 19rem) {
+  .repair-progress { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .repair-progress li { flex-direction: column; gap: 0.5rem; padding: 0; text-align: center; }
-  .repair-progress li::before { inset: 7px 0 auto; border: 0; border-top: 1px solid var(--color-slate-300); }
-  .repair-progress li:first-child::before { inset: 7px 0 auto 50%; }
-  .repair-progress li:last-child::before { inset: 7px 50% auto 0; }
+  .repair-progress li::before { inset: 9px 0 auto; border: 0; border-top: 1px solid var(--color-slate-300); }
+  .repair-progress li:first-child::before { inset: 9px 0 auto 50%; }
+  .repair-progress li:last-child::before { inset: 9px 50% auto 0; }
 }

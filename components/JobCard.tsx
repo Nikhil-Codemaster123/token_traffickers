@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { shrinkImage } from "./imageUpload";
-import { btn, chip, inputClass, linkClass, meta, PhoneFrame, Spinner } from "./ui";
+import { btn, chip, Icon, iconTile, inputClass, linkClass, meta, phoneCard, PhoneFrame, phoneHero, Spinner } from "./ui";
 import { post, usePoll } from "./usePoll";
 
 type Job = {
@@ -71,24 +71,24 @@ export function JobCard({ token }: { token: string }) {
 
   return (
     <PhoneFrame label="Job via WhatsApp link">
-      {!data && (error ? <p className="p-5 text-sm text-rose-700">{error}</p> : <div className="p-5"><Spinner /></div>)}
+      {!data && (error ? <p className="m-4 rounded-xl bg-rose-50 p-4 text-sm text-rose-800 ring-1 ring-rose-200 ring-inset">{error}</p> : <div className="p-5"><Spinner /></div>)}
       {data && (
-        <div className="space-y-6 p-5 sm:p-6">
-          <header className="space-y-2">
+        <div className="space-y-4 p-3 sm:p-4">
+          <header className={phoneHero}>
             <p className={meta}>{data.partner} · new job</p>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">{data.job_card?.headline ?? "Preparing the job card…"}</h1>
+            <h1 className="text-2xl leading-tight font-semibold tracking-tight wrap-anywhere text-slate-950">{data.job_card?.headline ?? "Preparing the job card…"}</h1>
             {data.waiting_for_owner && <p role="status" className={`${chip} bg-amber-50 text-amber-800 ring-amber-200`}>Waiting for owner</p>}
-            {["completed", "closed"].includes(data.status) && <p className="rounded-lg bg-emerald-50 px-4 py-3 text-emerald-800">Done. The invoice is on the case. Thank you!</p>}
-            {data.status === "stopped" && <p className="rounded-lg bg-rose-50 px-4 py-3 text-rose-800">This job was cancelled by the property manager.</p>}
+            {["completed", "closed"].includes(data.status) && <p className="flex items-start gap-2 rounded-xl bg-emerald-50 p-3 font-medium text-emerald-800 ring-1 ring-emerald-200 ring-inset"><Icon name="check" className="mt-1 size-4" />Done. The invoice is on the case. Thank you!</p>}
+            {data.status === "stopped" && <p className="rounded-xl bg-rose-50 p-3 font-medium text-rose-800 ring-1 ring-rose-200 ring-inset">This job was cancelled by the property manager.</p>}
           </header>
 
           {data.accepted && (
-            <div className="-mx-5 space-y-3 border-y border-slate-200 bg-slate-50/65 px-5 py-4 sm:-mx-6 sm:px-6">
+            <div className={`${phoneCard} divide-y divide-slate-100 [&>div+div]:pt-2 [&>div:not(:last-child)]:pb-2`}>
               <div className="flex items-baseline justify-between gap-4"><span className={meta}>Flat</span><span className="font-mono text-xs">{data.flat}</span></div>
               {data.tenant && (
                 <div className="flex items-baseline justify-between gap-4">
                   <span className={meta}>Tenant</span>
-                  <span className="min-w-0 text-right font-medium">{data.tenant.name}{data.tenant.phone && <> · <a href={`tel:${data.tenant.phone.replace(/\s/g, "")}`} className={`${linkClass} inline-flex min-h-11 items-center`}>{data.tenant.phone}</a></>}</span>
+                  <span className="min-w-0 text-right font-medium wrap-anywhere">{data.tenant.name}{data.tenant.phone && <> · <a href={`tel:${data.tenant.phone.replace(/\s/g, "")}`} className={`${linkClass} inline-flex min-h-11 items-center`}>{data.tenant.phone}</a></>}</span>
                 </div>
               )}
               <div className="flex items-baseline justify-between gap-4"><span className={meta}>Access</span><span className="min-w-0 text-right wrap-anywhere">{data.access_notes ?? "—"}</span></div>
@@ -104,10 +104,11 @@ export function JobCard({ token }: { token: string }) {
           )}
 
           {data.status === "scheduled" && (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-slate-900">Job done?</h2>
+            <div className={`${phoneCard} space-y-3`}>
+              <h2 className="text-base font-semibold tracking-tight text-slate-950">Job done?</h2>
               <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="What you did (e.g. ignition electrode replaced)" className={`${inputClass} h-11 w-full`} />
-              <label className={`${btn.secondary} relative w-full py-2 wrap-anywhere`}>
+              <label className={`${btn.secondary} relative w-full wrap-anywhere`}>
+                <Icon name="document" />
                 {file ? `Invoice: ${file.name}` : "Attach invoice (PDF or photo)"}
                 <input type="file" accept="application/pdf,image/*" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               </label>
@@ -115,13 +116,13 @@ export function JobCard({ token }: { token: string }) {
                 <input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Invoice no. (optional)" className={`${inputClass} h-11 w-full`} />
                 <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder="€ gross" className={`${inputClass} h-11 w-full`} />
               </div>
-              <button disabled={!!busy} onClick={done} className={`${btn.success} w-full`}>{busy === "done" ? "Reading the invoice…" : "Mark as done"}</button>
+              <button disabled={!!busy} onClick={done} className={`${btn.success} w-full py-3.5`}>{busy === "done" ? "Reading the invoice…" : "Mark as done"}</button>
             </div>
           )}
 
-          <div className="flex items-start gap-4 border-y border-slate-200 py-4">
-            <span aria-hidden="true" className="building-mark mt-1 shrink-0 text-indigo-700" />
-            <div className="min-w-0 space-y-1">
+          <div className={`${phoneCard} flex items-start gap-3`}>
+            <span className={iconTile}><Icon name="building" /></span>
+            <div className="min-w-0 space-y-1 wrap-anywhere">
               <div className="font-semibold text-slate-950">{data.street}</div>
               <div className="text-slate-600">
                 {data.building.heating} {data.building.fuel} heating · built {data.building.year} · {data.scope === "building" ? "whole building" : "one flat"}
@@ -131,8 +132,8 @@ export function JobCard({ token }: { token: string }) {
           </div>
 
           {data.status === "dispatched" && (
-            <div className="space-y-3">
-              <button disabled={!!busy} onClick={() => run("accept", () => post(`/api/job/${token}/accept`))} className={`${btn.success} w-full`}>
+            <div className={`${phoneCard} space-y-3`}>
+              <button disabled={!!busy} onClick={() => run("accept", () => post(`/api/job/${token}/accept`))} className={`${btn.success} w-full py-3.5`}>
                 {busy === "accept" ? "Accepting…" : "Accept job"}
               </button>
               {!propose ? (
@@ -148,24 +149,24 @@ export function JobCard({ token }: { token: string }) {
           )}
 
           {data.status === "scheduled" && (
-            <form onSubmit={sendOffer} className="space-y-3 border-t border-slate-100 pt-4">
-              <label className="block text-sm font-semibold text-slate-900" htmlFor="offer-pdf">Offer PDF</label>
+            <form onSubmit={sendOffer} className={`${phoneCard} space-y-3`}>
+              <label className="block text-base font-semibold tracking-tight text-slate-950" htmlFor="offer-pdf">Offer PDF</label>
               <input id="offer-pdf" name="file" type="file" accept="application/pdf,.pdf" required disabled={!!busy}
-                onChange={(e) => setOfferFile(e.target.files?.[0] ?? null)} className="block h-11 w-full cursor-pointer rounded-lg text-sm text-slate-600 file:mr-3 file:h-11 file:cursor-pointer file:rounded-lg file:bg-slate-100 file:px-4 file:font-medium file:text-slate-800 hover:file:bg-slate-200 disabled:cursor-not-allowed" />
+                onChange={(e) => setOfferFile(e.target.files?.[0] ?? null)} className="block h-11 w-full cursor-pointer rounded-xl bg-slate-50 text-sm text-slate-700 ring-1 ring-slate-400 ring-inset file:mr-3 file:h-11 file:cursor-pointer file:border-0 file:bg-indigo-50 file:px-3 file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 disabled:cursor-not-allowed" />
               <button disabled={!!busy || !offerFile} className={`${btn.secondary} w-full`}>{busy === "offer" ? "Reading the offer…" : "Send offer"}</button>
             </form>
           )}
 
           {data.job_card && (
-            <div className="space-y-3 border-t border-slate-100 pt-4">
+            <div className={`${phoneCard} space-y-3 wrap-anywhere`}>
               <p>{data.job_card.problem_summary}</p>
               <p className="text-slate-600">{data.job_card.urgency_reason}</p>
-              <ul className="space-y-3">
+              <ul className="space-y-2 border-t border-slate-100 pt-3">
                 {data.job_card.checklist.map((item) => <li key={item} className="flex gap-3"><span className="text-slate-500">☐</span>{item}</li>)}
               </ul>
             </div>
           )}
-          {msg && <p className="text-sm text-slate-700">{msg}</p>}
+          {msg && <p className="rounded-xl bg-indigo-50 p-3 text-sm text-slate-700 ring-1 ring-indigo-100 ring-inset">{msg}</p>}
         </div>
       )}
     </PhoneFrame>
