@@ -1,4 +1,5 @@
 import * as tools from "./tools";
+import { db } from "./supabase";
 
 // The 5 tools of the voice agent, as OpenAI function tools (fallback loop).
 // The ElevenLabs agent gets the same 5 as webhook tools: see agent/tools.md (same names, same parameters).
@@ -82,6 +83,30 @@ export const TOOL_DEFS = [
 type Args = Record<string, unknown>;
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
 
+/**
+ * Voice agents sometimes mangle the case id ("CASE_5AECBD7C", "5aecbd7c", empty).
+ * Fix the format; if it still isn't found, use the caller's newest open case from the last 30 minutes.
+ */
+async function resolveCaseId(raw: unknown, contactId?: string): Promise<string> {
+  const s = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  if (s && s !== "undefined" && s !== "null") {
+    const id = s.startsWith("case_") ? s : `case_${s.replace(/^case[\s_-]*/, "")}`;
+    const hit = await db().from("cases").select("case_id").eq("case_id", id).maybeSingle();
+    if (hit.data) return id;
+  }
+  let q = db()
+      .from("cases")
+      .select("case_id")
+      .not("status", "in", "(closed,stopped,emergency)")
+      .gte("created_at", new Date(Date.now() - 30 * 60_000).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1);
+  if (contactId) q = q.contains("reporters", [contactId]);
+  const latest = (await q).data?.[0] as { case_id: string } | undefined;
+  if (!latest) throw new Error(`case ${String(raw)} not found`);
+  return latest.case_id;
+}
+
 /** Runs a tool by name. `contactId` fills in the caller when the model leaves it out. */
 export async function runTool(name: string, args: Args, contactId?: string): Promise<unknown> {
   const contact_id = str(args.contact_id) ?? contactId;
@@ -100,11 +125,11 @@ export async function runTool(name: string, args: Args, contactId?: string): Pro
         availability_note: str(args.availability_note),
       });
     case "record_consent":
-      return tools.recordConsent({ case_id: String(args.case_id), contact_id });
+      return tools.recordConsent({ case_id: await resolveCaseId(args.case_id, contact_id), contact_id });
     case "pick_partner":
-      return tools.pickPartnerTool({ case_id: String(args.case_id), after: str(args.after) });
+      return tools.pickPartnerTool({ case_id: await resolveCaseId(args.case_id, contact_id), after: str(args.after) });
     case "book_slot":
-      return tools.bookSlot({ case_id: String(args.case_id), slot_id: String(args.slot_id) });
+      return tools.bookSlot({ case_id: await resolveCaseId(args.case_id, contact_id), slot_id: String(args.slot_id) });
     default:
       throw new Error(`unknown tool ${name}`);
   }
