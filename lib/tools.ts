@@ -37,8 +37,8 @@ async function loadUnit(id: string): Promise<Unit> {
 }
 async function updateCase(case_id: string, patch: Partial<CaseRow>): Promise<CaseRow> {
   return must<CaseRow>(
-    await db().from("cases").update(patch).eq("case_id", case_id).select("*").single(),
-    `update case ${case_id}`,
+      await db().from("cases").update(patch).eq("case_id", case_id).select("*").single(),
+      `update case ${case_id}`,
   );
 }
 
@@ -60,13 +60,13 @@ export async function getResidentContext(args: { contact_id?: string; phone?: st
   const unit = await loadUnit(contact.unit_id);
   const property = await loadProperty(unit.property_id);
   const open = must<CaseRow[]>(
-    await db()
-      .from("cases")
-      .select("*")
-      .eq("property_id", property.property_id)
-      .not("status", "in", OPEN_STATUSES_EXCLUDED)
-      .order("created_at", { ascending: false }),
-    "open cases",
+      await db()
+          .from("cases")
+          .select("*")
+          .eq("property_id", property.property_id)
+          .not("status", "in", OPEN_STATUSES_EXCLUDED)
+          .order("created_at", { ascending: false }),
+      "open cases",
   ).filter((c) => c.scope === "building" || c.unit_id === unit.unit_id);
 
   const partnerNames: Record<string, string> = {};
@@ -102,8 +102,8 @@ export async function getResidentContext(args: { contact_id?: string; phone?: st
       appointment: fmtSlot(c.appointment_start, c.appointment_end) || null,
     })),
     hint: buildingHeatingCase
-      ? "A building-wide heating case is already open. If the caller has the same problem, call open_case with scope 'building': it joins that case instead of dispatching twice."
-      : undefined,
+        ? "A building-wide heating case is already open. If the caller has the same problem, call open_case with scope 'building': it joins that case instead of dispatching twice."
+        : undefined,
   };
 }
 
@@ -127,17 +127,48 @@ export async function openCase(args: {
   const flags = rawFlags.map((f) => f.trim().toLowerCase()).filter((f) => f && f !== "none");
   const emergency = flags.some((f) => ["gas_smell", "co_alarm", "fire", "flooding"].includes(f));
 
+  // "emergency" is reserved for danger (gas, CO, fire, water); a cold flat is at most "high"
+  const urgency = emergency ? "emergency" : args.urgency === "emergency" ? "high" : (args.urgency ?? "normal");
+
+  // Voice agents sometimes call open_case twice in one call: reuse the caller's fresh, unbooked case
+  if (!emergency) {
+    const recent = (
+        await db()
+            .from("cases")
+            .select("*")
+            .eq("contact_id", contact.contact_id)
+            .eq("category", category)
+            .in("status", ["new", "partner_picked"])
+            .gte("created_at", new Date(Date.now() - 15 * 60_000).toISOString())
+            .order("created_at", { ascending: false })
+            .limit(1)
+    ).data?.[0] as CaseRow | undefined;
+    if (recent) {
+      await updateCase(recent.case_id, {
+        symptoms: args.symptoms,
+        summary: args.symptoms,
+        scope,
+        urgency,
+        availability_note: args.availability_note ?? recent.availability_note,
+      });
+      return {
+        case_id: recent.case_id,
+        reused: true,
+        next: "This call's case already exists and was updated. Continue: data notice and record_consent if not done yet, then pick_partner.",
+      };
+    }
+  }
   if (!emergency && category === "heating" && scope === "building") {
     const existing = (
-      await db()
-        .from("cases")
-        .select("*")
-        .eq("property_id", property.property_id)
-        .eq("category", "heating")
-        .eq("scope", "building")
-        .not("status", "in", OPEN_STATUSES_EXCLUDED)
-        .order("created_at", { ascending: false })
-        .limit(1)
+        await db()
+            .from("cases")
+            .select("*")
+            .eq("property_id", property.property_id)
+            .eq("category", "heating")
+            .eq("scope", "building")
+            .not("status", "in", OPEN_STATUSES_EXCLUDED)
+            .order("created_at", { ascending: false })
+            .limit(1)
     ).data?.[0] as CaseRow | undefined;
     if (existing) {
       const reporters = Array.from(new Set([...(existing.reporters ?? []), contact.contact_id]));
@@ -171,28 +202,26 @@ export async function openCase(args: {
     }
   }
 
-  // "emergency" is reserved for danger (gas, CO, fire, water); a cold flat is at most "high"
-  const urgency = emergency ? "emergency" : args.urgency === "emergency" ? "high" : (args.urgency ?? "normal");
   const created = must<CaseRow>(
-    await db()
-      .from("cases")
-      .insert({
-        property_id: property.property_id,
-        unit_id: unit.unit_id,
-        contact_id: contact.contact_id,
-        scope,
-        category,
-        urgency,
-        status: emergency ? "emergency" : "new",
-        symptoms: args.symptoms,
-        summary: args.symptoms,
-        safety_flags: flags,
-        availability_note: args.availability_note ?? null,
-        reporters: [contact.contact_id],
-      })
-      .select("*")
-      .single(),
-    "open case",
+      await db()
+          .from("cases")
+          .insert({
+            property_id: property.property_id,
+            unit_id: unit.unit_id,
+            contact_id: contact.contact_id,
+            scope,
+            category,
+            urgency,
+            status: emergency ? "emergency" : "new",
+            symptoms: args.symptoms,
+            summary: args.symptoms,
+            safety_flags: flags,
+            availability_note: args.availability_note ?? null,
+            reporters: [contact.contact_id],
+          })
+          .select("*")
+          .single(),
+      "open case",
   );
   await logEvent({
     case_id: created.case_id,
@@ -239,18 +268,18 @@ export async function recordConsent(args: {
   const c = await loadCase(args.case_id);
   const data_shared = args.data_shared?.length ? args.data_shared : ["name", "phone", "unit", "access_notes", "photos"];
   const row = must<{ consent_id: string; given_at: string }>(
-    await db()
-      .from("consents")
-      .insert({
-        case_id: c.case_id,
-        contact_id: args.contact_id ?? c.contact_id,
-        data_shared,
-        legal_basis: args.legal_basis ?? "lease",
-        channel: args.channel ?? "voice",
-      })
-      .select("consent_id, given_at")
-      .single(),
-    "record consent",
+      await db()
+          .from("consents")
+          .insert({
+            case_id: c.case_id,
+            contact_id: args.contact_id ?? c.contact_id,
+            data_shared,
+            legal_basis: args.legal_basis ?? "lease",
+            channel: args.channel ?? "voice",
+          })
+          .select("consent_id, given_at")
+          .single(),
+      "record consent",
   );
   await logEvent({
     case_id: c.case_id,
@@ -260,7 +289,7 @@ export async function recordConsent(args: {
     channel: args.channel ?? "voice",
     text: `Data-sharing notice given (basis: ${args.legal_basis ?? "lease"}): ${data_shared.join(", ")}`,
   });
-  return { consent_id: row.consent_id };
+  return { consent_id: row.consent_id, next: `Now call pick_partner with case_id ${c.case_id}.` };
 }
 
 /** Tool 4: picks the right craftsman and returns 2 free slots to offer. */
@@ -272,7 +301,6 @@ export async function pickPartnerTool(args: { case_id: string; after?: string })
     return { found: false, say: "No suitable firm is free right now. Tell the caller the property manager will call back within the hour." };
   }
   const estimate = estimateCost(pick.partner);
-  const limit = await approvalLimitFor(c.property_id);
   await updateCase(c.case_id, {
     partner_id: pick.partner.partner_id,
     pick_reasons: pick.reasons,
@@ -286,13 +314,14 @@ export async function pickPartnerTool(args: { case_id: string; after?: string })
     actor: "agent",
     text: `Picked ${pick.partner.name}: ${pick.reasons.join("; ")}.${pick.rejected.length ? ` Not picked: ${pick.rejected.map((r) => `${r.name} (${r.why})`).join("; ")}.` : ""}`,
   });
+  const slots = pick.slots.map((s) => ({ slot_id: s.slot_id, label: fmtSlot(s.slot_start, s.slot_end) }));
+  const offer = slots.map((s) => s.label).join(", or ");
   return {
     found: true,
     partner: pick.partner.name,
-    reasons: pick.reasons,
-    slots: pick.slots.map((s) => ({ slot_id: s.slot_id, label: fmtSlot(s.slot_start, s.slot_end) })),
-    estimated_cost_eur: estimate,
-    approval_limit_eur: limit,
+    slots,
+    say: `${pick.partner.name} can come ${offer}. Which suits you?`,
+    next: `Wait for the caller's choice, then call book_slot with case_id ${c.case_id} and the chosen slot_id (${slots.map((s) => s.slot_id).join(" or ")}). Never read out ids. Don't say the job is sent before book_slot answers.`,
   };
 }
 
@@ -301,7 +330,7 @@ export async function bookSlot(args: { case_id: string; slot_id: string }) {
   const c = await loadCase(args.case_id);
   if (!c.partner_id) return { booked: false, say: "Call pick_partner first." };
   const slot = (
-    await db().from("availability").update({ booked: true }).eq("slot_id", args.slot_id).eq("booked", false).select("*").maybeSingle()
+      await db().from("availability").update({ booked: true }).eq("slot_id", args.slot_id).eq("booked", false).select("*").maybeSingle()
   ).data as { slot_id: string; slot_start: string; slot_end: string } | null;
   if (!slot) return { booked: false, say: "That slot was just taken. Offer the other one, or call pick_partner again." };
 
@@ -335,10 +364,10 @@ export async function bookSlot(args: { case_id: string; slot_id: string }) {
   if (approval === "auto") {
     // Runs after the tool answers, so the voice agent isn't kept waiting for the job card
     after(() =>
-      dispatchJob(updated, {
-        by: "system",
-        reason: `estimated €${c.estimated_cost_eur} is under the owner's €${limit} limit`,
-      }).catch((e) => console.error("dispatch failed", e)),
+        dispatchJob(updated, {
+          by: "system",
+          reason: `estimated €${c.estimated_cost_eur} is under the owner's €${limit} limit`,
+        }).catch((e) => console.error("dispatch failed", e)),
     );
   } else {
     await logEvent({
@@ -364,9 +393,9 @@ export async function bookSlot(args: { case_id: string; slot_id: string }) {
     appointment: label,
     approval,
     say:
-      approval === "auto"
-        ? `Confirm ${partner.name} for ${label}. Say they'll get a message with a link to follow the case, add a photo or chat.`
-        : `Say the slot ${label} is reserved and the property manager confirms it shortly, because the job needs approval.`,
+        approval === "auto"
+            ? `Confirm ${partner.name} for ${label}. Say they'll get a message with a link to follow the case, add a photo or chat.`
+            : `Say the slot ${label} is reserved and the property manager confirms it shortly, because the job needs approval.`,
   };
 }
 
@@ -378,8 +407,8 @@ export async function dispatchJob(c: CaseRow, opts: { by: "system" | "manager"; 
   const partner = await loadPartner(c.partner_id);
   const property = await loadProperty(c.property_id);
   const history = must<{ summary: string | null; created_at: string }[]>(
-    await db().from("cases").select("summary, created_at").eq("property_id", c.property_id).eq("status", "closed").order("created_at", { ascending: false }).limit(3),
-    "history",
+      await db().from("cases").select("summary, created_at").eq("property_id", c.property_id).eq("status", "closed").order("created_at", { ascending: false }).limit(3),
+      "history",
   );
 
   let card: JobCard;
@@ -398,7 +427,7 @@ export async function dispatchJob(c: CaseRow, opts: { by: "system" | "manager"; 
         },
       },
       instructions:
-        "You write a short job card for a heating craftsman in English. Use only the facts given. No prices, no personal data. Headline under 8 words; checklist of at most 4 short items to check or bring.",
+          "You write a short job card for a heating craftsman in English. Use only the facts given. No prices, no personal data. Headline under 8 words; checklist of at most 4 short items to check or bring.",
       content: [
         {
           type: "input_text",
@@ -513,8 +542,8 @@ export async function completeJob(token: string, input: { note: string; file?: F
 
   const billed_to = (amount ?? 0) <= limit ? "reltix" : "owner"; // Reltix: below the limit invoices go through Reltix
   const doc = must<{ document_id: string }>(
-    await db().from("documents").insert({ case_id: c.case_id, type: "invoice", file_url, number, amount_eur: amount, billed_to }).select("document_id").single(),
-    "save invoice",
+      await db().from("documents").insert({ case_id: c.case_id, type: "invoice", file_url, number, amount_eur: amount, billed_to }).select("document_id").single(),
+      "save invoice",
   );
   await updateCase(c.case_id, { status: "completed" });
   await logEvent({ case_id: c.case_id, unit_id: c.unit_id, type: "job.done", actor: "partner", channel: "whatsapp", text: `${partner.name} marked the job done: "${input.note}"` });
@@ -571,11 +600,11 @@ export async function buildResult(case_id: string) {
       approval: c.approval,
       appointment: { start: c.appointment_start, end: c.appointment_end },
       invoice: invoice
-        ? { number: invoice.number, amount_eur: invoice.amount_eur, billed_to: invoice.billed_to, document_id: invoice.document_id }
-        : null,
+          ? { number: invoice.number, amount_eur: invoice.amount_eur, billed_to: invoice.billed_to, document_id: invoice.document_id }
+          : null,
       consent: consent
-        ? { data_shared: consent.data_shared, legal_basis: consent.legal_basis, given_at: consent.given_at, channel: consent.channel }
-        : null,
+          ? { data_shared: consent.data_shared, legal_basis: consent.legal_basis, given_at: consent.given_at, channel: consent.channel }
+          : null,
     },
   };
 }
@@ -662,8 +691,8 @@ export async function caseState(case_id: string, view: "manager" | "tenant") {
   const partner = c.partner_id ? await loadPartner(c.partner_id) : null;
   const events = must<EventRow[]>(await db().from("events").select("*").eq("case_id", case_id).order("occurred_at"), "events");
   const documents = must<{ document_id: string; type: string; file_url: string | null; number: string | null; amount_eur: number | null; billed_to: string | null }[]>(
-    await db().from("documents").select("*").eq("case_id", case_id).order("created_at"),
-    "documents",
+      await db().from("documents").select("*").eq("case_id", case_id).order("created_at"),
+      "documents",
   );
   const appointment = fmtSlot(c.appointment_start, c.appointment_end);
 

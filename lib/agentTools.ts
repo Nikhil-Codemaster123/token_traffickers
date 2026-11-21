@@ -1,5 +1,5 @@
-import * as tools from "./tools";
 import { db } from "./supabase";
+import * as tools from "./tools";
 
 // The 5 tools of the voice agent, as OpenAI function tools (fallback loop).
 // The ElevenLabs agent gets the same 5 as webhook tools: see agent/tools.md (same names, same parameters).
