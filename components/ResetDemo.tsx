@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { btn } from "./ui";
+import { btn, inputClass } from "./ui";
 
 /** Deletes demo cases and events and re-creates free slots relative to now (keeps the 2 historical repairs). */
 export function ResetDemo() {
@@ -21,13 +21,13 @@ export function ResetDemo() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <input
         type="password"
         value={secret}
         onChange={(e) => setSecret(e.target.value)}
         placeholder="AGENT_TOOL_SECRET"
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        className={`${inputClass} h-10 w-full`}
       />
       <button onClick={reset} className={btn.secondary}>Reset demo data</button>
       {state && <p className="text-xs text-slate-600">{state}</p>}

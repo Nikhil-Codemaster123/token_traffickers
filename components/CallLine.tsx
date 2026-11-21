@@ -4,7 +4,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { createElement, useEffect, useRef, useState } from "react";
 import { Timeline, type Ev } from "./Timeline";
-import { btn, Card, StatusChip } from "./ui";
+import { btn, Card, inputClass, linkClass, meta, StatusChip } from "./ui";
 import { post, usePoll } from "./usePoll";
 
 type Resident = { contact_id: string; name: string; unit_id: string | null; language: string | null };
@@ -27,22 +27,23 @@ export function CallLine({ agentId }: { agentId?: string }) {
   }, []);
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-4 px-4 py-6 lg:grid-cols-2">
+    <div className="line-page mx-auto grid max-w-6xl items-start gap-6 px-4 py-8 sm:px-6 md:grid-cols-2 lg:px-8">
       <Card
+        className="[&_h2]:text-2xl [&_h2]:leading-8 [&_h2]:tracking-tight"
         title="Incoming call · property management line"
         aside={
           agentId ? (
-            <button onClick={() => setMode(mode === "agent" ? "fallback" : "agent")} className="text-xs text-slate-500 underline underline-offset-2">
+            <button onClick={() => setMode(mode === "agent" ? "fallback" : "agent")} className={`${linkClass} min-h-10 cursor-pointer text-xs`}>
               {mode === "agent" ? "use fallback loop" : "use ElevenLabs agent"}
             </button>
           ) : (
-            <span className="text-xs text-slate-500">fallback loop</span>
+            <span className="text-xs font-medium text-slate-500">fallback loop</span>
           )
         }
       >
-        <label className="mb-4 block text-sm">
-          <span className="text-slate-500">Caller (matched by phone number)</span>
-          <select value={contactId} onChange={(e) => setContactId(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2">
+        <label className="mb-4 block border-t border-slate-100 pt-4">
+          <span className={meta}>Caller (matched by phone number)</span>
+          <select value={contactId} onChange={(e) => setContactId(e.target.value)} className={`${inputClass} mt-2 h-10 w-full`}>
             {residents.length === 0 && <option value="c_203">Jonas Weber · unit_2a</option>}
             {residents.map((r) => (
               <option key={r.contact_id} value={r.contact_id}>{r.name} · {r.unit_id}</option>
@@ -61,7 +62,7 @@ function AgentWidget({ agentId, contactId }: { agentId: string; contactId: strin
   return (
     <div className="space-y-3">
       <Script src="https://unpkg.com/@elevenlabs/convai-widget-embed" strategy="afterInteractive" />
-      <p className="text-sm text-slate-600">Start the call in the ElevenLabs widget. Its tools write into centrix live (right).</p>
+      <p className="border-l-2 border-indigo-300 bg-indigo-50/50 px-4 py-3">Start the call in the ElevenLabs widget. Its tools write into centrix live (right).</p>
       {createElement("elevenlabs-convai", {
         "agent-id": agentId,
         "dynamic-variables": JSON.stringify({ contact_id: contactId }),
@@ -206,18 +207,18 @@ function VoiceLoop({ contactId }: { contactId: string }) {
             <button onClick={hangUp} className={btn.danger}>Hang up</button>
           </>
         )}
-        <select value={lang} onChange={(e) => setLang(e.target.value)} className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm">
+        <select value={lang} onChange={(e) => setLang(e.target.value)} className={`${inputClass} h-10`}>
           <option value="en-GB">English</option>
           <option value="de-DE">Deutsch</option>
         </select>
-        {busy && <span className="animate-pulse text-sm text-slate-500">agent is thinking…</span>}
+        {busy && <span className="text-sm text-slate-500">agent is thinking…</span>}
       </div>
 
-      <div className="max-h-80 space-y-2 overflow-y-auto rounded-lg bg-slate-50 p-3">
+      <div className="max-h-80 min-h-24 space-y-3 overflow-y-auto rounded-lg bg-slate-50 p-4">
         {msgs.length === 0 && <p className="text-sm text-slate-500">Press “Call the line”, then talk (Chrome) or type.</p>}
         {msgs.map((m, i) => (
           <div key={i} className={`flex ${m.who === "caller" ? "justify-end" : "justify-start"}`}>
-            <p className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${m.who === "caller" ? "bg-sky-600 text-white" : "bg-white text-slate-900 shadow-sm"}`}>{m.text}</p>
+            <p className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-white text-slate-800 shadow-xs"}`}>{m.text}</p>
           </div>
         ))}
       </div>
@@ -231,7 +232,7 @@ function VoiceLoop({ contactId }: { contactId: string }) {
           }}
           className="flex gap-2"
         >
-          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="…or type what the caller says" className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="…or type what the caller says" className={`${inputClass} h-10 flex-1`} />
           <button disabled={busy} className={btn.secondary}>Send</button>
         </form>
       )}
@@ -239,11 +240,11 @@ function VoiceLoop({ contactId }: { contactId: string }) {
 
       {trace.length > 0 && (
         <div>
-          <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Tool calls</h3>
-          <ol className="space-y-1">
+          <h3 className={`${meta} mb-3`}>Tool calls</h3>
+          <ol className="space-y-3 border-l border-slate-200 pl-3">
             {trace.map((t, i) => (
-              <li key={i} className="truncate font-mono text-xs text-slate-600">
-                <span className="text-violet-700">{t.tool}</span> → {JSON.stringify(t.result).slice(0, 120)}
+              <li key={i} className="font-mono text-xs leading-5 wrap-anywhere text-slate-600">
+                <span className="text-indigo-700">{t.tool}</span> → {JSON.stringify(t.result).slice(0, 120)}
               </li>
             ))}
           </ol>
@@ -265,13 +266,13 @@ function LiveCase({ contactId }: { contactId: string }) {
   return (
     <Card
       title="Live in centrix"
-      aside={latest && <Link href={`/centrix/case/${latest.case_id}`} className="text-xs text-indigo-600 underline underline-offset-2">open case ↗</Link>}
+      aside={latest && <Link href={`/centrix/case/${latest.case_id}`} className={`${linkClass} text-xs`}>open case ↗</Link>}
     >
       {!latest ? (
         <p className="text-sm text-slate-500">No case for this caller yet.</p>
       ) : (
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3 text-sm">
             <StatusChip status={latest.status} />
             <span className="text-slate-600">{latest.unit_id}{latest.scope === "building" ? " · whole building" : ""}</span>
             {latest.partner_name && <span className="text-slate-600">· {latest.partner_name}</span>}

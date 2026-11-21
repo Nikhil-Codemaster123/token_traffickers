@@ -16,19 +16,19 @@ const CHANNEL: Record<string, string> = { voice: "call", whatsapp: "WhatsApp", e
 export function Timeline({ events, compact = false }: { events: Ev[]; compact?: boolean }) {
   if (events.length === 0) return <p className="text-sm text-slate-500">Nothing yet.</p>;
   return (
-    <ol className={compact ? "space-y-2" : "space-y-3"}>
+    <ol className="pl-1">
       {events.map((e) => {
         const a = ACTOR[e.actor] ?? { label: e.actor, dot: "bg-slate-400" };
         return (
-          <li key={e.event_id} className="flex gap-3">
-            <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${a.dot}`} />
+          <li key={e.event_id} className={`relative flex gap-4 before:absolute before:top-2 before:left-[3.5px] before:h-full before:w-px before:bg-slate-200 last:pb-0 last:before:hidden ${compact ? "pb-4" : "pb-6"}`}>
+            <span className={`relative mt-1.5 size-2 shrink-0 rounded-full ring-4 ring-white ${a.dot}`} />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-5 text-slate-500">
                 <span className="font-medium text-slate-700">{a.label}</span>
                 {e.channel && <span>· {CHANNEL[e.channel] ?? e.channel}</span>}
-                <span className="ml-auto tabular-nums">{fmtTime(e.occurred_at)}</span>
+                <span className="inline-flex items-center gap-2 tabular-nums before:size-0.5 before:rounded-full before:bg-slate-400">{fmtTime(e.occurred_at)}</span>
               </div>
-              <p className={`break-words text-slate-800 ${compact ? "text-xs" : "text-sm"}`}>
+              <p className={`mt-1 wrap-anywhere text-slate-700 ${compact ? "text-xs leading-5" : "text-sm leading-6"}`}>
                 <Linkify text={e.text ?? e.type} />
               </p>
             </div>

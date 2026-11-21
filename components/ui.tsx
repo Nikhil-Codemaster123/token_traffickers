@@ -1,38 +1,45 @@
 import type { ReactNode } from "react";
 
 export const STATUS: Record<string, { label: string; cls: string }> = {
-  new: { label: "New", cls: "bg-slate-100 text-slate-700" },
-  partner_picked: { label: "Firm picked", cls: "bg-sky-50 text-sky-700" },
-  booked: { label: "Booked", cls: "bg-sky-50 text-sky-700" },
-  awaiting_approval: { label: "Needs approval", cls: "bg-amber-100 text-amber-800" },
-  dispatched: { label: "Sent to firm", cls: "bg-indigo-50 text-indigo-700" },
-  scheduled: { label: "Firm confirmed", cls: "bg-indigo-100 text-indigo-800" },
-  completed: { label: "Repaired", cls: "bg-emerald-50 text-emerald-700" },
-  closed: { label: "Closed", cls: "bg-emerald-100 text-emerald-800" },
-  reopened: { label: "Reopened", cls: "bg-rose-100 text-rose-700" },
-  stopped: { label: "Stopped", cls: "bg-slate-200 text-slate-700" },
-  emergency: { label: "Emergency", cls: "bg-red-600 text-white" },
+  new: { label: "New", cls: "bg-slate-100 text-slate-700 ring-slate-200" },
+  partner_picked: { label: "Firm picked", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  booked: { label: "Booked", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  awaiting_approval: { label: "Needs approval", cls: "bg-amber-50 text-amber-800 ring-amber-200" },
+  dispatched: { label: "Sent to firm", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  scheduled: { label: "Firm confirmed", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  completed: { label: "Repaired", cls: "bg-emerald-50 text-emerald-800 ring-emerald-200" },
+  closed: { label: "Closed", cls: "bg-emerald-50 text-emerald-800 ring-emerald-200" },
+  reopened: { label: "Reopened", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
+  stopped: { label: "Stopped", cls: "bg-rose-50 text-rose-800 ring-rose-200" },
+  emergency: { label: "Emergency", cls: "bg-rose-50 text-rose-800 ring-rose-200" },
 };
 
+export const chip = "inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset";
+
 export function StatusChip({ status, waitingForOwner = false }: { status: string; waitingForOwner?: boolean }) {
-  const s = STATUS[status] ?? { label: status, cls: "bg-slate-100 text-slate-700" };
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${s.cls}`}>{status === "awaiting_approval" && waitingForOwner ? "Waiting for owner" : s.label}</span>;
+  const s = STATUS[status] ?? { label: status, cls: "bg-slate-100 text-slate-700 ring-slate-200" };
+  return <span className={`${chip} ${s.cls}`}>{status === "awaiting_approval" && waitingForOwner ? "Waiting for owner" : s.label}</span>;
 }
 
 export const ACTOR: Record<string, { label: string; dot: string }> = {
-  tenant: { label: "Tenant", dot: "bg-sky-500" },
-  agent: { label: "Voice agent", dot: "bg-violet-500" },
-  partner: { label: "Craftsman", dot: "bg-orange-500" },
-  manager: { label: "Manager", dot: "bg-slate-900" },
-  owner: { label: "Owner", dot: "bg-amber-500" },
+  tenant: { label: "Tenant", dot: "bg-slate-500" },
+  agent: { label: "Voice agent", dot: "bg-indigo-500" },
+  partner: { label: "Craftsman", dot: "bg-slate-600" },
+  manager: { label: "Manager", dot: "bg-slate-700" },
+  owner: { label: "Owner", dot: "bg-slate-500" },
   system: { label: "Automation", dot: "bg-indigo-500" },
 };
 
+export const surface = "min-w-0 rounded-2xl bg-white shadow-sm ring-1 ring-slate-900/5";
+export const meta = "text-xs font-medium uppercase tracking-wide text-slate-500";
+export const inputClass = "min-w-0 rounded-lg border border-slate-500/75 bg-white px-3 text-sm text-slate-900 shadow-xs placeholder:text-slate-500 hover:border-slate-500";
+export const linkClass = "rounded-sm font-medium text-indigo-700 underline decoration-indigo-300 underline-offset-4 transition-colors hover:text-indigo-900 hover:decoration-indigo-700";
+
 export function Card({ title, aside, children, className = "" }: { title?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm ${className}`}>
+    <section className={`${surface} p-5 sm:p-6 ${className}`}>
       {(title || aside) && (
-        <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           {title && <h2 className="text-sm font-semibold text-slate-900">{title}</h2>}
           {aside}
         </div>
@@ -42,23 +49,25 @@ export function Card({ title, aside, children, className = "" }: { title?: React
   );
 }
 
+const buttonBase = "inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-center text-sm leading-5 font-medium shadow-xs transition-colors disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none";
+const primary = `${buttonBase} bg-indigo-600 text-white enabled:hover:bg-indigo-700`;
 export const btn = {
-  primary: "inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50",
-  secondary: "inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50",
-  danger: "inline-flex items-center justify-center gap-2 rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50",
-  success: "inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50",
+  primary,
+  secondary: `${buttonBase} bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 disabled:ring-slate-200`,
+  danger: `${buttonBase} bg-rose-50 text-rose-800 ring-1 ring-inset ring-rose-200 enabled:hover:bg-rose-100`,
+  success: primary,
 };
 
 /** Phone-sized frame for the tenant portal and the craftsman job card (looks right on a laptop screen recording). */
 export function PhoneFrame({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex min-h-[calc(100vh-3rem)] items-start justify-center bg-slate-100 px-3 py-6">
-      <div className="w-full max-w-[400px] overflow-hidden rounded-[2rem] border-[6px] border-slate-900 bg-white shadow-xl">
-        <div className="flex items-center justify-between bg-slate-900 px-5 py-2 text-[11px] font-medium text-slate-300">
-          <span>{label}</span>
-          <span className="h-1.5 w-12 rounded-full bg-slate-700" />
+    <div className="mx-auto flex max-w-6xl items-start justify-center px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md rounded-3xl bg-white shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/10">
+        <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+          <span className="flex items-center gap-2 text-xs font-semibold text-indigo-700 before:size-2 before:rounded-full before:bg-indigo-500">{label}</span>
+          <span className="h-1 w-8 rounded-full bg-slate-200" />
         </div>
-        <div className="max-h-[calc(100vh-7rem)] overflow-y-auto">{children}</div>
+        <div className="rounded-b-3xl sm:max-h-[calc(100dvh-12rem)] sm:overflow-y-auto [&_button]:h-auto [&_button]:min-h-11 [&_button]:w-full [&_label:has(input[type=file])]:h-auto [&_label:has(input[type=file])]:min-h-11">{children}</div>
       </div>
     </div>
   );
@@ -66,16 +75,16 @@ export function PhoneFrame({ label, children }: { label: string; children: React
 
 /** Renders text with clickable links (messages in the timeline carry the tenant and craftsman links). */
 export function Linkify({ text }: { text: string }) {
-  const parts = text.split(/(https?:\/\/\S+)/g);
+  const parts = text.split(/(https?:\/\/\S+|\(logged\)$)/g);
   return (
     <>
       {parts.map((p, i) =>
         /^https?:\/\//.test(p) ? (
-          <a key={i} href={p} target="_blank" rel="noreferrer" className="break-all text-indigo-600 underline underline-offset-2">
+          <a key={i} href={p} target="_blank" rel="noreferrer" className={`${linkClass} break-all`}>
             {p.replace(/^https?:\/\/[^/]+/, "")}
           </a>
         ) : (
-          <span key={i}>{p}</span>
+          <span key={i} className={p === "(logged)" ? "text-slate-500" : undefined}>{p}</span>
         ),
       )}
     </>
@@ -83,5 +92,5 @@ export function Linkify({ text }: { text: string }) {
 }
 
 export function Spinner({ label = "Loading…" }: { label?: string }) {
-  return <p className="animate-pulse text-sm text-slate-500">{label}</p>;
+  return <p className="flex items-center gap-2 text-sm text-slate-500 before:size-2 before:rounded-full before:bg-indigo-500">{label}</p>;
 }

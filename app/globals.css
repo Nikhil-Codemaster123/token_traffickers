@@ -4,6 +4,7 @@
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-sm--line-height: 1.5rem;
 }
 
 html {
@@ -12,4 +13,16 @@ html {
 
 body {
   font-family: var(--font-sans);
+}
+
+:where(a, button, input, select, textarea):focus-visible,
+label:has(input[type="file"]:focus-visible) {
+  outline: 2px solid var(--color-indigo-600);
+  outline-offset: 3px;
+}
+
+body:has(.centrix-page) .nav-centrix,
+body:has(.line-page) .nav-line {
+  background-color: var(--color-indigo-50);
+  color: var(--color-indigo-700);
 }
