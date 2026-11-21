@@ -1,6 +1,6 @@
 # centrix partner connector · Heating repairs
 
-**Heizung Schmidt GmbH** (`p_schmidt`) maintains the central gas heating at Musterstraße 12 in Aachen. One boiler failure can leave several flats cold. With a heating firm connected, neighbours can report the same fault, centrix books one visit, and tenants confirm the repair. A reported gas smell ends the booking flow and alerts the manager.
+**Heizung Schmidt GmbH** (`p_schmidt`) maintains the central gas heating at Musterstraße 12 in Aachen. One boiler failure can leave several flats cold. With a heating firm connected, a tenant’s call becomes a booked visit, the firm accepts and invoices through one job link, and the tenant confirms the repair. A reported gas smell ends the booking flow and alerts the manager.
 
 ## Partner and services
 
@@ -31,6 +31,8 @@ At Musterstraße 12 the fuel check excludes oil-only Ölheizung Meyer. Schmidt e
 The case links `case_id`, `property_id`, `unit_id` and `contact_id`. OpenAI uses `symptoms`, `scope`, `urgency`, building details and repair history to write `job_card` (`headline`, `problem_summary`, `urgency_reason`, `checklist`). A template supplies the card if generation fails.
 
 Booking creates a random `cases.job_token`. Schmidt’s `job_channel` is WhatsApp. The dispatch message gives the headline, address, appointment and `/job/[token]` link. Its delivery fields are `flow` = `dispatch`, `channel` = `whatsapp`, `case_id`, `unit_id`, `to` (firm’s name, phone and email), `text` and `link`. `NOTIFY_MODE=log` records messages on the timeline. Configured n8n mode also sends them. Schmidt lists email for long offers (`offer_channel`). In the demo the firm uploads its PDF on the job card. [Delivery payload](../n8n/README.md)
+
+**In production:** the dispatch goes out as a WhatsApp template from Reltix’s registered sender, with the job link as a variable. Twilio’s trial only allows fixed templates, so the demo logs messages on the timeline. Document links would be signed and expiring instead of public.
 
 <div style="page-break-before: always"></div>
 
@@ -71,19 +73,19 @@ Done writes `cases.result` with `unit_id`, `contact_id` and a `case` object cont
 
 ## Next partner · Internet provider
 
-Example Fibre GmbH is a paper integration. Its profile uses the same nine connector fields. [Connector schema](../connectors/schema.json) · [Internet example](../connectors/internet-example-fibre.json)
+Both partners use the same nine connector fields: Heizung Schmidt is live in the demo, and Example Fibre GmbH is a paper integration. [Connector schema](../connectors/schema.json) · [Heating profile](../connectors/heating-schmidt.json) · [Internet example](../connectors/internet-example-fibre.json)
 
-| Connector field | How the internet order would work |
-|---|---|
-| `identity` | `p_fibre`, category `internet`, `job_channel` = `api`. |
-| `offers` | Fibre 500 at €34.99 per month. |
-| `eligibility` | The address is in the fibre area and the move-in date is known. |
-| `availability` | Offer the earliest activation date (`earliest_date`). |
-| `data_needed` | Pre-fill tenant name, address and move-in date. |
-| `consent_scope` | Share those three fields with the tenant’s explicit agreement (`tenant_yes`). |
-| `order` | Submit the pre-filled order by API with the tenant’s one-click signature. |
-| `status_updates` | Report `ordered`, `signed`, `active` or `cancelled`. |
-| `result` | Write a `service_contract` with consent to the unit. |
+| Connector field | Heating · Heizung Schmidt (live) | Internet · Example Fibre (paper) |
+|---|---|---|
+| `identity` | `p_schmidt`, category `heating`, `job_channel` = `whatsapp`. | `p_fibre`, category `internet`, `job_channel` = `api`. |
+| `offers` | Call-out €59, labour €78 per hour, annual boiler maintenance, larger repairs by quotation. | Fibre 500 at €34.99 per month. |
+| `eligibility` | Category `heating`, fuel `gas`, postcodes 52062, 52064, 52066. | The address is in the fibre area and the move-in date is known. |
+| `availability` | Free `availability` slots; the two earliest are offered. | Offer the earliest activation date (`earliest_date`). |
+| `data_needed` | The job card from the call; flat, tenant name, phone and photos after Accept; access notes on the appointment day. | Pre-fill tenant name, address and move-in date. |
+| `consent_scope` | `name`, `phone`, `unit`, `access_notes`, `photos`, on the lease basis. | Share those three fields with the tenant’s explicit agreement (`tenant_yes`). |
+| `order` | Booking a slot sends the WhatsApp job link (`/job/[token]`). | Submit the pre-filled order by API with the tenant’s one-click signature. |
+| `status_updates` | `accept`, `propose`, `offer`, `done` with invoice. | Report `ordered`, `signed`, `active` or `cancelled`. |
+| `result` | `cases.result` with the invoice and consent; the tenant’s confirmation closes the case. | Write a `service_contract` with consent to the unit. |
 
 ## Confirmed by Reltix and our assumptions
 
@@ -92,7 +94,7 @@ Example Fibre GmbH is a paper integration. Its profile uses the same nine connec
 - Managers decide repairs alone up to a limit agreed per owner, most often €3–4k; above it, the owner is asked.
 - Craftsmen get jobs mostly by WhatsApp; longer offers go by email.
 - Heating is mostly central, often gas; 10–15% of buildings still use oil.
-- Invoices below the limit mostly go through Reltix; above it, sometimes straight to the owner.
+- Invoices below the limit mostly go through Reltix; some go to owners.
 
 **Our assumptions**
 
@@ -101,6 +103,6 @@ Example Fibre GmbH is a paper integration. Its profile uses the same nine connec
 - A repair's estimated cost comes from framework rates, so centrix can check it against the limit before dispatching.
 - Craftsmen share free slots; when none fits, they propose a time on the job card.
 - Tenants' phone numbers are on file, so callers are identified; an unknown number is checked by name and address.
-- Access details (key safe code, caretaker) are stored in centrix and released only after Accept.
+- Access details (key safe code, caretaker) are stored in centrix and released only after Accept, on the appointment day.
 - Craftsmen send invoices as PDF; we read number and amount with OpenAI.
 - All data is synthetic and extends Reltix's sample payload.
