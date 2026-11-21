@@ -15,9 +15,9 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
       <div className={surface}>
-        <header className="flex items-center justify-between gap-8 rounded-t-2xl bg-indigo-900 px-5 py-8 text-white sm:px-8">
+        <header className="flex items-center justify-between gap-8 rounded-t-2xl bg-[#2C2456] px-5 py-8 text-white sm:px-8">
           <div className="max-w-lg space-y-3">
-            <h1 className="text-2xl font-semibold tracking-tight">centrix partner studio</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-[#E49A72]">centrix partner studio</h1>
             <p className="text-sm font-medium tracking-wide text-indigo-200">Broken heater → craftsman</p>
             <p className="max-w-[50ch] text-pretty text-indigo-100">A partner plugged into centrix: one tenant call, the craftsman gets the job, the result lands on the unit.</p>
           </div>
@@ -33,12 +33,12 @@ export default function Home() {
         </header>
         <div className="grid divide-y divide-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           {screens.map((s) => (
-            <Link key={s.href} href={s.href} className="flex items-start justify-between gap-4 p-5 transition-colors last:rounded-b-2xl hover:bg-indigo-50/50 focus-visible:-outline-offset-4 sm:p-6 sm:first:rounded-bl-2xl sm:last:rounded-bl-none">
+            <Link key={s.href} href={s.href} className="flex items-start justify-between gap-4 p-5 text-black transition-colors last:rounded-b-2xl hover:bg-[#B1BFCA] focus-visible:-outline-offset-4 sm:p-6 sm:first:rounded-bl-2xl sm:last:rounded-bl-none">
               <div className="space-y-2">
-                <h2 className="text-sm font-semibold text-indigo-800">{s.title}</h2>
-                <p className="max-w-[40ch] text-pretty">{s.text}</p>
+                <h2 className="text-sm font-semibold text-black">{s.title}</h2>
+                <p className="max-w-[40ch] text-pretty text-black">{s.text}</p>
               </div>
-              <span aria-hidden="true" className="entry-arrow mt-2 text-indigo-600" />
+              <span aria-hidden="true" className="entry-arrow mt-2 text-black" />
             </Link>
           ))}
         </div>

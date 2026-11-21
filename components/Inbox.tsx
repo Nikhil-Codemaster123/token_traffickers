@@ -58,7 +58,7 @@ export function Inbox() {
           <div className={surface}>
             <table role="table" className="w-full table-fixed text-left text-sm max-md:block">
               <thead role="rowgroup" className={`text-slate-600 max-md:block ${cases.length ? "max-md:sr-only" : ""}`}>
-                <tr role="row" className="border-b border-slate-200/80 bg-slate-50/80 max-md:flex max-md:flex-wrap max-md:gap-x-4 max-md:gap-y-2 max-md:rounded-t-2xl max-md:px-4 max-md:py-3 md:[&_th]:py-3">
+                <tr role="row" className="border-b border-slate-200/80 bg-[#7F93A7]/80 max-md:flex max-md:flex-wrap max-md:gap-x-4 max-md:gap-y-2 max-md:rounded-t-2xl max-md:px-4 max-md:py-3 md:[&_th]:py-3">
                   <th role="columnheader" scope="col" className={`${meta} md:w-[24%] md:rounded-tl-2xl md:pr-2 md:pl-5`}>{columns.tenant}</th>
                   <th role="columnheader" scope="col" className={`${meta} md:w-[24%] md:px-2`}>{columns.problem}</th>
                   <th role="columnheader" scope="col" className={`${meta} md:w-[22%] md:px-2`}>{columns.firm}</th>

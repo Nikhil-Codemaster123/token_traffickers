@@ -131,7 +131,7 @@ export function CaseView({ id }: { id: string }) {
           <div className="min-w-0 space-y-6">
             <Card title="Reported by the tenant" aside={<span className="text-xs text-slate-500">{fmtTime(c.created_at)} · by phone</span>}>
               <p className="text-pretty wrap-anywhere text-slate-800">{c.symptoms}</p>
-              <dl className="mt-5 grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-900/5 sm:grid-cols-3">
+              <dl className="mt-5 grid grid-cols-2 gap-4 rounded-xl bg-[#7F93A7] p-4 ring-1 ring-slate-900/5 sm:grid-cols-3">
                 <Field label="Tenant" value={data.contact ? `${data.contact.name}${c.reporters.length > 1 ? ` +${c.reporters.length - 1}` : ""}` : "—"} />
                 <Field label="Urgency" value={c.urgency} />
                 <Field label="Home" value={c.availability_note ?? "—"} />
@@ -145,7 +145,7 @@ export function CaseView({ id }: { id: string }) {
 
             {Boolean(c.result) && (
               <Card title="Written back to centrix" aside={<span className="text-xs text-slate-500">unit · contact · case</span>}>
-                <pre className="overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-700 ring-1 ring-slate-900/5">{JSON.stringify(c.result, null, 2)}</pre>
+                <pre className="overflow-x-auto rounded-xl bg-[#7F93A7] p-4 text-xs leading-5 text-slate-700 ring-1 ring-slate-900/5">{JSON.stringify(c.result, null, 2)}</pre>
               </Card>
             )}
           </div>
@@ -172,7 +172,7 @@ export function CaseView({ id }: { id: string }) {
 
             <Card title="Approval">
               {offer ? (
-                <div className="space-y-4 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-900/5">
+                <div className="space-y-4 rounded-xl bg-[#7F93A7] p-3 ring-1 ring-slate-900/5">
                   <p className="approval-amounts">
                     <span>Offer {offer.number} <b>{euros.format(Number(offer.amount_eur))}</b></span>
                     <span> · </span>
@@ -183,7 +183,7 @@ export function CaseView({ id }: { id: string }) {
               ) : c.estimated_cost_eur === null ? (
                 <EmptyState>No estimate yet.</EmptyState>
               ) : (
-                <p className="approval-amounts rounded-xl bg-slate-50 p-3 ring-1 ring-slate-900/5">
+                <p className="approval-amounts rounded-xl bg-[#7F93A7] p-3 ring-1 ring-slate-900/5">
                   <span>Estimate <b>€{c.estimated_cost_eur}</b></span>
                   <span> · </span>
                   <span>owner&apos;s limit <b>€{data.approval_limit_eur}</b></span>
@@ -286,7 +286,7 @@ function RepairJourney({ status, resumeStatus, hasOffer, ownerApproved, events }
         const skipped = icon === "shield" && !ownerApproved && !resumeStatus;
         return (
           <li key={label} aria-current={current ? "step" : undefined} aria-label={skipped ? `${label} (within the limit)` : done ? `${label} (complete)` : undefined} className={`relative flex min-w-0 items-center gap-3 pb-2 before:absolute before:top-4 before:left-[15px] before:h-full before:w-px last:pb-0 last:before:hidden sm:flex-1 sm:flex-col sm:gap-2 sm:px-1 sm:pb-0 sm:text-center sm:before:left-1/2 sm:before:h-px sm:before:w-full ${done || skipped ? "before:bg-indigo-200" : "before:bg-slate-200"}`}>
-            <span className={`relative grid size-8 shrink-0 place-items-center rounded-full ring-1 ring-inset ${current && waiting ? "bg-amber-50 text-amber-800 ring-amber-300" : done ? "bg-indigo-50 text-indigo-700 ring-indigo-200" : "bg-white text-slate-500 ring-slate-300"} ${current ? "outline-2 outline-offset-2 outline-indigo-400" : ""}`}>
+            <span className={`relative grid size-8 shrink-0 place-items-center rounded-full ring-1 ring-inset ${current && waiting ? "bg-amber-50 text-amber-800 ring-amber-300" : done ? "bg-indigo-50 text-indigo-700 ring-indigo-200" : "bg-[#7F93A7] text-slate-500 ring-slate-300"} ${current ? "outline-2 outline-offset-2 outline-indigo-400" : ""}`}>
               {skipped ? <span aria-hidden="true" className="h-px w-2 bg-current" /> : <Icon name={done ? "check" : icon} />}
             </span>
             <span className={`text-xs leading-4 ${done || current ? "font-semibold text-slate-900" : "text-slate-500"}`}>{label}</span>
@@ -301,7 +301,7 @@ function Field({ label, value, row = false }: { label: string; value: string; ro
   if (row) {
     const [count, ...unit] = value.split(" ");
     return (
-              <div className="flex min-w-0 flex-col-reverse justify-end gap-2 rounded-xl bg-slate-50/80 px-3 py-4 ring-1 ring-indigo-900/10 sm:px-4">
+              <div className="flex min-w-0 flex-col-reverse justify-end gap-2 rounded-xl bg-[#7F93A7]/80 px-3 py-4 ring-1 ring-indigo-900/10 sm:px-4">
         <dt className={meta}>{label}</dt>
         <dd className="text-sm leading-5 font-medium text-indigo-800">
           <span className="text-3xl leading-none font-semibold tracking-tight text-indigo-900 tabular-nums sm:text-[2.5rem]">{count}</span> {unit.join(" ")}

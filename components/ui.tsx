@@ -41,7 +41,7 @@ export const pageWidth = "mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8";
 
 export function CentrixHeader({ caseId }: { caseId?: string }) {
   return (
-    <header className="border-b border-slate-300/80 bg-slate-100/80">
+    <header className="border-b border-slate-300/80 bg-[#7F93A7]/80">
       <div className={`${pageWidth} flex min-h-12 items-center gap-3 py-2`}>
         <BrandMark />
         <p className="min-w-0 text-xs font-semibold tracking-[0.1em] text-slate-800 uppercase">
@@ -53,7 +53,7 @@ export function CentrixHeader({ caseId }: { caseId?: string }) {
 }
 
 export const STATUS: Record<string, { label: string; cls: string }> = {
-  new: { label: "New", cls: "bg-slate-100 text-slate-700 ring-slate-200" },
+  new: { label: "New", cls: "bg-[#6D8196] text-slate-700 ring-slate-200" },
   partner_picked: { label: "Firm picked", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
   booked: { label: "Booked", cls: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
   awaiting_approval: { label: "Needs approval", cls: "bg-amber-50 text-amber-800 ring-amber-200" },
@@ -69,17 +69,17 @@ export const STATUS: Record<string, { label: string; cls: string }> = {
 export const chip = "inline-flex w-fit max-w-full shrink-0 items-center gap-2 rounded-full px-2.5 py-1 text-xs leading-4 font-semibold ring-1 ring-inset before:size-1.5 before:shrink-0 before:rounded-full before:bg-current";
 
 export function StatusChip({ status, waitingForOwner = false }: { status: string; waitingForOwner?: boolean }) {
-  const s = STATUS[status] ?? { label: status, cls: "bg-slate-100 text-slate-700 ring-slate-200" };
+  const s = STATUS[status] ?? { label: status, cls: "bg-[#6D8196] text-slate-700 ring-slate-200" };
   return <span className={`${chip} ${s.cls}`}>{status === "awaiting_approval" && waitingForOwner ? "Waiting for owner" : s.label}</span>;
 }
 
-export const surface = "min-w-0 rounded-2xl bg-slate-50/90 shadow-[0_1px_2px_rgba(15,23,42,.06),0_12px_24px_-18px_rgba(15,23,42,.24)] ring-1 ring-slate-400/25";
+export const surface = "min-w-0 rounded-2xl bg-[#7F93A7]/90 text-[#243442] shadow-[0_1px_2px_rgba(15,23,42,.06),0_12px_24px_-18px_rgba(15,23,42,.24)] ring-1 ring-slate-400/25";
 export const meta = "text-xs leading-4 font-semibold uppercase tracking-[0.075em] text-slate-500";
-export const inputClass = "min-w-0 rounded-xl border border-slate-400 bg-slate-100 px-3 text-base text-slate-900 shadow-xs placeholder:text-slate-500 hover:border-slate-500 focus:border-indigo-600 motion-safe:transition-colors motion-safe:duration-150 sm:text-sm";
+export const inputClass = "min-w-0 rounded-xl border border-slate-400 bg-[#A8B7C5] px-3 text-base text-black shadow-xs placeholder:text-black hover:border-slate-500 focus:border-indigo-600 motion-safe:transition-colors motion-safe:duration-150 sm:text-sm";
 export const linkClass = "rounded-sm font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-4 hover:text-indigo-900 hover:decoration-indigo-700 motion-safe:transition-colors motion-safe:duration-150";
 export const iconTile = "grid size-9 shrink-0 place-items-center rounded-xl bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100 ring-inset";
 export const phoneCard = `${surface} p-4 sm:p-5`;
-export const phoneHero = "space-y-3 rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50 via-white to-white p-4 sm:p-5";
+export const phoneHero = "space-y-3 rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50 via-[#6D8196] to-[#6D8196] p-4 sm:p-5";
 
 export function Card({ title, aside, children, className = "" }: { title?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string }) {
   return (
@@ -95,25 +95,25 @@ export function Card({ title, aside, children, className = "" }: { title?: React
   );
 }
 
-const buttonBase = "inline-flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 text-center text-sm leading-5 font-semibold motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-150 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none";
+const buttonBase = "inline-flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 text-center text-sm leading-5 font-semibold motion-safe:transition-[background-color,color,box-shadow] motion-safe:duration-150 disabled:cursor-not-allowed disabled:bg-[#6D8196] disabled:text-slate-500 disabled:shadow-none";
 const primary = `${buttonBase} bg-indigo-600 text-white shadow-[0_1px_2px_#29205d26,inset_0_1px_0_#ffffff26] ring-1 ring-indigo-900/20 ring-inset hover:bg-indigo-700 active:bg-indigo-800 disabled:ring-slate-200`;
 export const btn = {
   primary,
-  secondary: `${buttonBase} bg-slate-100 text-slate-700 shadow-xs ring-1 ring-slate-300 ring-inset hover:bg-slate-200 active:bg-slate-300 disabled:ring-slate-200`,
-  danger: `${buttonBase} bg-slate-100 text-rose-800 shadow-xs ring-1 ring-rose-200 ring-inset hover:bg-rose-50 active:bg-rose-100 disabled:ring-slate-200`,
-  success: primary,
+  secondary: `${buttonBase} bg-[#A8B7C5] text-black shadow-xs ring-1 ring-slate-300 ring-inset hover:bg-[#B1BFCA] active:bg-[#91A5B5] disabled:ring-slate-200`,
+  danger: `${buttonBase} bg-[#A8B7C5] text-rose-800 shadow-xs ring-1 ring-rose-200 ring-inset hover:bg-rose-50 active:bg-rose-100 disabled:ring-slate-200`,
+  success: `${buttonBase} bg-[#E49A72] text-slate-950 shadow-[0_1px_2px_rgba(103,54,31,.24),inset_0_1px_0_#ffffff44] ring-1 ring-[#b96f4c] ring-inset hover:bg-[#d98a62] active:bg-[#c97b55] disabled:ring-slate-200`,
 };
 
 /** Phone-sized frame for the WhatsApp screens. */
 export function PhoneFrame({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className={`${pageWidth} flex items-start justify-center py-6 sm:py-8`}>
-      <div className="w-full max-w-md rounded-2xl bg-slate-200/70 shadow-[0_2px_6px_rgba(15,23,42,.07),0_20px_56px_-24px_rgba(42,35,88,.24)] ring-1 ring-slate-400/25">
-        <div className="flex min-h-14 items-center justify-between gap-4 rounded-t-2xl bg-indigo-900 px-4 py-3 text-indigo-50 ring-1 ring-white/10 ring-inset sm:px-5">
+      <div className="w-full max-w-md rounded-2xl bg-[#7F93A7]/90 shadow-[0_2px_6px_rgba(15,23,42,.07),0_20px_56px_-24px_rgba(42,35,88,.24)] ring-1 ring-slate-400/25">
+        <div className="flex min-h-14 items-center justify-between gap-4 rounded-t-2xl bg-[#2C2456] px-4 py-3 text-indigo-50 ring-1 ring-white/10 ring-inset sm:px-5">
           <span className="text-sm font-semibold tracking-tight">{label}</span>
           <BrandMark />
         </div>
-        <div className="rounded-b-2xl bg-slate-100/85 [&_button]:w-full [&_label:has(input[type=file])]:min-h-11">{children}</div>
+        <div className="rounded-b-2xl bg-[#7F93A7]/85 [&_button]:w-full [&_label:has(input[type=file])]:min-h-11">{children}</div>
       </div>
     </div>
   );

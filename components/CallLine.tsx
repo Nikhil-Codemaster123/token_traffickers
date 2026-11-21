@@ -29,11 +29,11 @@ export function CallLine({ agentId }: { agentId?: string }) {
   return (
     <div className={`line-page ${pageWidth} grid items-start gap-6 py-6 sm:py-8 md:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]`}>
       <section className={`${surface} p-5 sm:p-6`}>
-        <header className="-mx-5 -mt-5 mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 rounded-t-2xl border-b border-indigo-100 bg-linear-to-br from-indigo-50 to-slate-50 p-5 sm:-mx-6 sm:-mt-6 sm:p-6">
+        <header className="-mx-5 -mt-5 mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 rounded-t-2xl border-b border-[#2C2456] bg-[#2C2456] p-5 text-white sm:-mx-6 sm:-mt-6 sm:p-6">
           <div className="flex min-w-0 items-start gap-3">
-            <span className={iconTile}><Icon name="phone" /></span>
-            <h1 className="text-2xl leading-8 font-semibold tracking-tight text-slate-950">
-              Incoming call <span className="block text-sm leading-6 font-normal tracking-normal text-slate-600">· property management line</span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#E49A72] text-[#2C2456] ring-1 ring-[#E49A72] ring-inset"><Icon name="phone" /></span>
+            <h1 className="text-2xl leading-8 font-semibold tracking-tight text-[#E49A72]">
+              Incoming call <span className="block text-sm leading-6 font-normal tracking-normal text-[#E49A72]">· property management line</span>
             </h1>
           </div>
           {agentId ? (
@@ -41,10 +41,10 @@ export function CallLine({ agentId }: { agentId?: string }) {
               {mode === "agent" ? "use fallback loop" : "use ElevenLabs agent"}
             </button>
           ) : (
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs leading-5 font-semibold text-slate-600 ring-1 ring-slate-200">fallback loop</span>
+            <span className="rounded-full bg-[#A8B7C5] px-3 py-1 text-xs leading-5 font-semibold text-black ring-1 ring-slate-200">fallback loop</span>
           )}
         </header>
-        <label className="mb-4 block rounded-xl bg-slate-50 p-4 ring-1 ring-slate-900/5">
+          <label className="mb-4 block rounded-xl bg-[#A8B7C5] p-4 ring-1 ring-slate-900/5">
           <span className={`${meta} flex items-center gap-2`}><Icon name="user" />Caller (matched by phone number)</span>
           <select value={contactId} onChange={(e) => setContactId(e.target.value)} className={`${inputClass} mt-3 min-h-11 w-full`}>
             {residents.length === 0 && <option value="c_203">Jonas Weber · unit_2a</option>}
@@ -203,7 +203,7 @@ function VoiceLoop({ contactId }: { contactId: string }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {!live ? (
-          <button onClick={start} className={btn.success}><Icon name="phone" />Call the line</button>
+        <button onClick={start} className={btn.success}><Icon name="phone" />Call the line</button>
         ) : (
           <>
             <button onClick={listen} disabled={busy || listening} className={btn.primary}><Icon name="microphone" />{listening ? "Listening…" : "Speak"}</button>
@@ -217,11 +217,11 @@ function VoiceLoop({ contactId }: { contactId: string }) {
         {busy && <span className="text-sm text-slate-500">agent is thinking…</span>}
       </div>
 
-      <div className="max-h-80 space-y-3 overflow-y-auto rounded-xl bg-slate-50 p-4 ring-1 ring-slate-900/5 ring-inset">
+          <div className="max-h-80 space-y-3 overflow-y-auto rounded-xl bg-[#A8B7C5] p-4 ring-1 ring-slate-900/5 ring-inset">
         {msgs.length === 0 && <p className="flex items-start gap-3 text-sm text-pretty text-slate-600"><Icon name="activity" className="mt-1 size-4 text-indigo-700" />Press “Call the line”, then talk (Chrome) or type.</p>}
         {msgs.map((m, i) => (
           <div key={i} className={`flex ${m.who === "caller" ? "justify-end" : "justify-start"}`}>
-            <p className={`max-w-[90%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-slate-50 text-slate-800 ring-1 ring-slate-900/8"}`}>{m.text}</p>
+            <p className={`max-w-[90%] rounded-2xl px-4 py-2 text-sm leading-6 wrap-anywhere ${m.who === "caller" ? "rounded-br-sm bg-indigo-600 text-white" : "rounded-bl-sm bg-[#A8B7C5] text-black ring-1 ring-slate-900/8"}`}>{m.text}</p>
           </div>
         ))}
       </div>
@@ -272,10 +272,10 @@ function LiveCase({ contactId }: { contactId: string }) {
       aside={latest && <Link href={`/centrix/case/${latest.case_id}`} className={`${linkClass} inline-flex min-h-11 items-center text-xs`}>open case ↗</Link>}
     >
       {!latest ? (
-        <EmptyState className="min-h-36 flex-col justify-center rounded-xl bg-slate-50 p-4 text-center">No case for this caller yet.</EmptyState>
+        <EmptyState className="min-h-36 flex-col justify-center rounded-xl bg-[#A8B7C5] p-4 text-center">No case for this caller yet.</EmptyState>
       ) : (
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-slate-50 px-3 py-3 text-sm wrap-anywhere ring-1 ring-slate-900/5 ring-inset">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl bg-[#A8B7C5] px-3 py-3 text-sm wrap-anywhere ring-1 ring-slate-900/5 ring-inset">
             <StatusChip status={latest.status} />
             <span className="text-slate-600">{latest.unit_id}{latest.scope === "building" ? " · whole building" : ""}</span>
             {latest.partner_name && <span className="text-slate-600">· {latest.partner_name}</span>}

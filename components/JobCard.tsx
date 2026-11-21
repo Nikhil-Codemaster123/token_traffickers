@@ -152,7 +152,7 @@ export function JobCard({ token }: { token: string }) {
             <form onSubmit={sendOffer} className={`${phoneCard} space-y-3`}>
               <label className="block text-base font-semibold tracking-tight text-slate-950" htmlFor="offer-pdf">Offer PDF</label>
               <input id="offer-pdf" name="file" type="file" accept="application/pdf,.pdf" required disabled={!!busy}
-                onChange={(e) => setOfferFile(e.target.files?.[0] ?? null)} className="block h-11 w-full cursor-pointer rounded-xl bg-slate-50 text-sm text-slate-700 ring-1 ring-slate-400 ring-inset file:mr-3 file:h-11 file:cursor-pointer file:border-0 file:bg-indigo-50 file:px-3 file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 disabled:cursor-not-allowed" />
+                onChange={(e) => setOfferFile(e.target.files?.[0] ?? null)} className="block h-11 w-full cursor-pointer rounded-xl bg-[#7F93A7] text-sm text-slate-700 ring-1 ring-slate-400 ring-inset file:mr-3 file:h-11 file:cursor-pointer file:border-0 file:bg-indigo-50 file:px-3 file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100 disabled:cursor-not-allowed" />
               <button disabled={!!busy || !offerFile} className={`${btn.secondary} w-full`}>{busy === "offer" ? "Reading the offer…" : "Send offer"}</button>
             </form>
           )}

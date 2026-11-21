@@ -18,8 +18,8 @@
   --color-indigo-900: #273947;
   --color-slate-50: #f7f8fa;
   --color-slate-400: #8290a6;
-  --color-slate-500: #546277;
-  --color-slate-700: #394657;
+  --color-slate-500: #43596b;
+  --color-slate-700: #243442;
   --color-slate-950: #17212f;
 }
 
@@ -29,7 +29,12 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #dfe3e987, transparent), linear-gradient(#eef0f3, #e5e8ec 36rem);
+  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #829bb155, transparent), linear-gradient(#6D8196, #6D8196 36rem);
+}
+
+/* Keep text legible on the slate-blue surfaces. Indigo remains reserved for status and action states. */
+:where(.text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700, .text-slate-800, .text-slate-900, .text-slate-950) {
+  color: #000000;
 }
 
 :where(a, button, input, select, textarea):focus-visible,
@@ -49,7 +54,7 @@ label:has(input[type="file"]:focus-visible) {
 .workspace-tab:hover,
 body:has(.centrix-page) .nav-centrix,
 body:has(.line-page) .nav-line {
-  color: var(--color-indigo-700);
+  color: white;
 }
 
 body:has(.centrix-page) .nav-centrix::after,
