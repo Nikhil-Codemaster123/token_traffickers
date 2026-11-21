@@ -13,11 +13,11 @@ export type Ev = {
 
 const CHANNEL: Record<string, string> = { voice: "call", whatsapp: "WhatsApp", email: "email", portal: "portal", centrix: "centrix" };
 const ACTOR: Record<string, { label: string; icon: ComponentProps<typeof Icon>["name"]; tone: string }> = {
-  tenant: { label: "Tenant", icon: "user", tone: "bg-[#7F93A7] text-slate-700 ring-slate-200" },
+  tenant: { label: "Tenant", icon: "user", tone: "bg-[#B6C0CA] text-slate-700 ring-slate-200" },
   agent: { label: "Voice agent", icon: "microphone", tone: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
-  partner: { label: "Craftsman", icon: "wrench", tone: "bg-[#7F93A7] text-slate-700 ring-slate-200" },
-  manager: { label: "Manager", icon: "building", tone: "bg-[#7F93A7] text-slate-700 ring-slate-200" },
-  owner: { label: "Owner", icon: "key", tone: "bg-[#7F93A7] text-slate-700 ring-slate-200" },
+  partner: { label: "Craftsman", icon: "wrench", tone: "bg-[#B6C0CA] text-slate-700 ring-slate-200" },
+  manager: { label: "Manager", icon: "building", tone: "bg-[#B6C0CA] text-slate-700 ring-slate-200" },
+  owner: { label: "Owner", icon: "key", tone: "bg-[#B6C0CA] text-slate-700 ring-slate-200" },
   system: { label: "Automation", icon: "bolt", tone: "bg-indigo-50 text-indigo-700 ring-indigo-200" },
 };
 
@@ -27,7 +27,7 @@ export function Timeline({ events, compact = false }: { events: Ev[]; compact?: 
   return (
     <ol>
       {events.map((e) => {
-        const a = ACTOR[e.actor] ?? { label: e.actor, icon: "activity" as const, tone: "bg-[#7F93A7] text-slate-700 ring-slate-200" };
+        const a = ACTOR[e.actor] ?? { label: e.actor, icon: "activity" as const, tone: "bg-[#B6C0CA] text-slate-700 ring-slate-200" };
         return (
           <li key={e.event_id} className={`relative flex before:absolute before:top-4 before:left-[15px] before:h-full before:w-px before:bg-slate-200 last:pb-0 last:before:hidden ${compact ? "gap-3 pb-4" : "gap-4 pb-5"}`}>
             <span className={`relative z-0 grid size-8 shrink-0 place-items-center rounded-xl ring-1 ring-inset ${a.tone}`}><Icon name={a.icon} /></span>

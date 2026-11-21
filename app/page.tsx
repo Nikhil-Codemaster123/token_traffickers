@@ -33,7 +33,7 @@ export default function Home() {
         </header>
         <div className="grid divide-y divide-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           {screens.map((s) => (
-            <Link key={s.href} href={s.href} className="flex items-start justify-between gap-4 p-5 text-black transition-colors last:rounded-b-2xl hover:bg-[#B1BFCA] focus-visible:-outline-offset-4 sm:p-6 sm:first:rounded-bl-2xl sm:last:rounded-bl-none">
+            <Link key={s.href} href={s.href} className="flex items-start justify-between gap-4 p-5 text-black transition-colors last:rounded-b-2xl hover:bg-[#D3D9DF] focus-visible:-outline-offset-4 sm:p-6 sm:first:rounded-bl-2xl sm:last:rounded-bl-none">
               <div className="space-y-2">
                 <h2 className="text-sm font-semibold text-black">{s.title}</h2>
                 <p className="max-w-[40ch] text-pretty text-black">{s.text}</p>

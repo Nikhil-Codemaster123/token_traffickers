@@ -29,7 +29,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #829bb155, transparent), linear-gradient(#6D8196, #6D8196 36rem);
+  background-image: radial-gradient(ellipse 70rem 36rem at 70% -14rem, #D3D9DF88, transparent), linear-gradient(#B6C0CA, #B6C0CA 36rem);
 }
 
 /* Keep text legible on the slate-blue surfaces. Indigo remains reserved for status and action states. */

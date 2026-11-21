@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-[#6D8196] text-sm leading-6 text-black tabular-nums">
+      <body className="flex min-h-full flex-col bg-[#B6C0CA] text-sm leading-6 text-black tabular-nums">
         <nav className="border-b border-white/20 bg-[#2C2456] text-white backdrop-blur-lg">
           <div className={`${pageWidth} flex min-h-14 flex-wrap items-center justify-between gap-x-2`}>
             <Link href="/" className="inline-flex min-h-11 items-center gap-2 rounded-sm font-semibold tracking-tight text-slate-950 sm:gap-3">
