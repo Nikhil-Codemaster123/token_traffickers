@@ -1,54 +1,106 @@
-# Connector spec: plugging a partner into centrix
+# centrix partner connector · Heating repairs
 
-A partner plugs in by filling 9 fields: the 5 Reltix asks for, plus identity, data needed, consent scope and the result written back. Machine-readable: [`connectors/schema.json`](../connectors/schema.json), one file per partner next to it.
+**Heizung Schmidt GmbH** (`p_schmidt`) maintains the central gas heating at Musterstraße 12 in Aachen. One boiler failure can leave several flats cold. With a heating firm connected, neighbours can report the same fault, centrix books one visit, and tenants confirm the repair. A reported gas smell ends the booking flow and alerts the manager.
 
-| Field | What the partner provides | Heating firm (built) | Internet provider (paper example) |
-|---|---|---|---|
-| identity | name, category, job and offer channels | Heizung Schmidt GmbH, heating; WhatsApp for jobs, email for offers | Example Fibre GmbH, internet, API |
-| offers or services | what can be booked or bought, with prices | repair call-out, maintenance at framework rates; bigger jobs as an offer by email | Fibre 500, €34.99 a month |
-| eligibility rules | when the partner fits | heating trade for the building's fuel (gas or oil); postcodes it covers, e.g. 52062 | address in its fibre area; move-in date known |
-| availability | when it can deliver | free slots, or a proposed time on the job card | earliest activation date |
-| data needed | fields pre-filled from centrix | address, flat, heating type and fuel, building year, symptoms, photos, access notes | name, address, move-in date |
-| consent scope | fields shared with the partner, and on what basis | name, phone, flat, access notes, photos; covered by the lease | name, address, move-in date; the tenant's yes |
-| order or job | how centrix places it | WhatsApp job card link; Accept or propose a time | order with pre-filled fields, signed in one click |
-| status updates | events back to centrix | accepted, scheduled, offer sent, done, invoiced, cancelled | ordered, signed, active, cancelled |
-| result written back | what lands on the unit | completed case, appointment, invoice billed to Reltix | service_contract with consent |
+## Partner and services
 
-## Where each field lives in this repo (heating firm)
+Each `offers` entry has a `name` and optional `price_eur`, `per` and `note`. [Heating profile](../connectors/heating-schmidt.json) · [Seed records](../supabase/seed.sql)
 
-| Field | Code |
+| What the firm offers | Fields and demo values |
 |---|---|
-| identity, offers | `partners` table (`supabase/seed.sql`), `connectors/heating-schmidt.json` |
-| eligibility | `lib/pickPartner.ts`: trade + fuel + postcode filter, then maintenance firm, past jobs, rating, first free slot |
-| availability | `availability` table; `book_slot` books atomically; "Propose another time" on the job card |
-| data needed, consent scope | `jobView()` in `lib/tools.ts`: staged release; `consents` table |
-| order | `dispatchJob()`: job card (OpenAI) + WhatsApp link via `notify()` |
-| status updates | `events` table: `job.accepted`, `job.time_proposed`, `job.done`, `invoice.linked`, `job.stopped` |
-| result written back | `buildResult()` → `cases.result` |
+| Local coverage | `partners.category` = `heating`, `trades` = heating and plumbing, `fuels` = gas, `postcodes` = 52062, 52064, 52066. |
+| Repair call-out and labour | `callout_fee_eur` = €59 per visit, `hourly_rate_eur` = €78, `response_time_h` = 4, `rating` = 4.6. |
+| Annual boiler maintenance | The building’s `contracts` row has `type = service`, `partner_id = p_schmidt` and `terms.scope` “annual boiler maintenance”. |
+| Larger repairs by quotation | `documents` stores `document_id`, `case_id`, `type` = `offer`, PDF `file_url`, `number` and gross `amount_eur`. |
 
-## Example result (heater flow, synthetic values)
+## Eligibility and availability
 
-Same shape as Reltix's sample payload (unit, contact, then what happened):
+`POST /api/agent/tools/pick_partner` takes JSON with `case_id` and optional earliest time `after`. Agent tools use the `x-agent-secret` header. [Selection rules](../lib/pickPartner.ts)
 
-```json
-{
-  "unit_id": "unit_2a",
-  "contact_id": "c_203",
-  "case": {
-    "case_id": "case_4c34f988",
-    "category": "heating",
-    "scope": "building",
-    "partner": "Heizung Schmidt GmbH",
-    "status": "closed",
-    "approval": "auto",
-    "appointment": { "start": "2026-11-21T12:00:00+01:00", "end": "2026-11-21T14:00:00+01:00" },
-    "invoice": { "number": "R-2026-1121", "amount_eur": 318.4, "billed_to": "reltix", "document_id": "doc_47d382b3" },
-    "consent": {
-      "data_shared": ["name", "phone", "unit", "access_notes", "photos"],
-      "legal_basis": "lease",
-      "given_at": "2026-11-20T17:32:03+01:00",
-      "channel": "voice"
-    }
-  }
-}
-```
+1. Match `partners.category` to `cases.category` (`trades` describes skills). Check the building’s `fuel` against `fuels` when both are supplied, then its `postcode` against any nonempty `postcodes` list.
+2. Read eligible firms’ `availability` rows with `booked = false` and `slot_start` at or after the requested time (default now), earliest first.
+3. Start each firm’s score at twice its `rating` (default 4). Add 5 for matching `properties.maintenance_partner_id` and 1 per closed case it handled at the property (max 3). Subtract a quarter of the hours until its first free slot, or the full number of hours for `high` or `emergency` urgency. A firm without a slot gets a 999-hour wait and a further 100-point penalty.
+4. Offer up to two of the highest scorer’s earliest free slots, each with a `slot_id` and Berlin-time `label`. If no firm qualifies or the winner has no slot, the agent offers a manager callback within the hour.
+
+At Musterstraße 12 the fuel check excludes oil-only Ölheizung Meyer. Schmidt earns 5 points for maintenance and 2 for its two previous repairs.
+
+`POST /api/agent/tools/book_slot` takes JSON with `case_id` and the chosen `slot_id`. It sets `booked = true` only on a free row, saves `slot_id` and copies `slot_start` and `slot_end` to `appointment_start` and `appointment_end`. A competing booking gets `booked: false` and the agent offers another slot. Reset starts the demo schedule today if run before 10:00 Berlin time, otherwise tomorrow.
+
+## Placing the job
+
+The case links `case_id`, `property_id`, `unit_id` and `contact_id`. OpenAI uses `symptoms`, `scope`, `urgency`, building details and repair history to write `job_card` (`headline`, `problem_summary`, `urgency_reason`, `checklist`). A template supplies the card if generation fails.
+
+Booking creates a random `cases.job_token`. Schmidt’s `job_channel` is WhatsApp. The dispatch message gives the headline, address, appointment and `/job/[token]` link. Its delivery fields are `flow` = `dispatch`, `channel` = `whatsapp`, `case_id`, `unit_id`, `to` (firm’s name, phone and email), `text` and `link`. `NOTIFY_MODE=log` records messages on the timeline. Configured n8n mode also sends them. Schmidt lists email for long offers (`offer_channel`). In the demo the firm uploads its PDF on the job card. [Delivery payload](../n8n/README.md)
+
+<div style="page-break-before: always"></div>
+
+## Status updates back to centrix
+
+| Partner request | Payload and case effect |
+|---|---|
+| **Accept** · `POST /api/job/[token]/accept` | Empty body. `dispatched` → `scheduled`. Logs `job.accepted` and confirms the appointment to all reporting tenants by WhatsApp. |
+| **Propose a time** · `POST /api/job/[token]/propose` | JSON, e.g. `{"note":"Tomorrow 08:00–10:00"}`. Logs `job.time_proposed` for the manager to reschedule manually. |
+| **Send offer** · `POST /api/job/[token]/offer` | From `scheduled`, send `multipart/form-data` with `file` (PDF, up to 4 MiB). OpenAI must read an offer number and positive gross total. centrix saves `offer_document_id` and `offer_approval_limit_eur`, logs `offer.received` and returns `ok` and `needsOwner`. |
+| **Done + invoice** · `POST /api/job/[token]/done` | `multipart/form-data` with optional `note`, `file` (invoice PDF or photo), `number`, `amount_eur`. OpenAI reads missing invoice fields from the file when possible. The API accepts `scheduled` or `dispatched`, sets `completed`, logs `job.done` and `invoice.linked`, and asks tenants to confirm. |
+
+## Approval and billing
+
+| Decision | What centrix does |
+|---|---|
+| Estimate at booking | Schmidt’s estimate is €59 + 2 × €78 + €150 parts = **€365**. At or below the management contract’s `approval_limit_eur` (€3,500 here), centrix dispatches with `approval = auto`. Above it, centrix reserves the slot, sets `awaiting_approval` and emails the manager. The manager records the owner’s agreement via `POST /api/cases/[id]/approve`, dispatching with `approval = owner`. |
+| Gross offer after Accept | Within the limit, the job stays `scheduled` and the firm gets a go-ahead. Above it, centrix logs `offer.approval_requested`, sets `approval = pending` and pauses completion in `awaiting_approval`. The owner gets a separate `/owner/[token]` link by email. `GET /api/owner/[token]` shows the PDF, total and limit. One **Approve** tap sends an empty `POST /api/owner/[token]`, logs `offer.approved`, sets `approval = owner`, restores `scheduled` and notifies the firm and reporting tenants. |
+| Invoice recipient | At completion, `documents.billed_to` is `owner` when `cases.approval = owner`. All other invoices go to `reltix`. [Document and billing rules](../supabase/offer-approval.sql) |
+
+## Consent and privacy
+
+The agent gives a repair-specific notice. If the tenant objects, the manager arranges the visit. Otherwise `POST /api/agent/tools/record_consent` takes `case_id` and optional `contact_id`. The `consents` row records both IDs, `given_at`, `channel = voice`, `legal_basis = lease` and `data_shared` (`name`, `phone`, `unit`, `access_notes`, `photos`). The lease basis is a demo assumption.
+
+| When the firm opens `GET /api/job/[token]` | Data returned |
+|---|---|
+| Before Accept | `status`, `accepted`, `waiting_for_owner`, `partner`, `job_card`, `street`, `building` (year, heating, fuel), `scope`, `appointment`. |
+| After Accept | Adds `flat` (unit ID and floor), `tenant.name`, `tenant.phone` and `photos` (case photo URLs). These fields also appear during offer approval and on completed or closed jobs. |
+| On the appointment day | The card reveals `units.access_notes` only while `scheduled` and the date matches `appointment_start` in Europe/Berlin. It hides the notes during owner review and after Done. |
+
+The job link grants access to the card. The synthetic demo uses public document URLs. [Job card and status handlers](../lib/tools.ts)
+
+<div style="page-break-before: always"></div>
+
+## Result on the unit
+
+Done writes `cases.result` with `unit_id`, `contact_id` and a `case` object containing `case_id`, `category`, `scope`, `partner`, `status`, `approval`, `appointment`, `invoice` and the latest `consent`. The tenant confirms via `POST /api/portal/[caseId]/confirm`. Sending `{"fixed":true}` closes the case and refreshes the result. Sending `{"fixed":false}` reopens it and alerts the manager. [Example result](../connectors/heating-schmidt.json)
+
+## Next partner · Internet provider
+
+Example Fibre GmbH is a paper integration. Its profile uses the same nine connector fields. [Connector schema](../connectors/schema.json) · [Internet example](../connectors/internet-example-fibre.json)
+
+| Connector field | How the internet order would work |
+|---|---|
+| `identity` | `p_fibre`, category `internet`, `job_channel` = `api`. |
+| `offers` | Fibre 500 at €34.99 per month. |
+| `eligibility` | The address is in the fibre area and the move-in date is known. |
+| `availability` | Offer the earliest activation date (`earliest_date`). |
+| `data_needed` | Pre-fill tenant name, address and move-in date. |
+| `consent_scope` | Share those three fields with the tenant’s explicit agreement (`tenant_yes`). |
+| `order` | Submit the pre-filled order by API with the tenant’s one-click signature. |
+| `status_updates` | Report `ordered`, `signed`, `active` or `cancelled`. |
+| `result` | Write a `service_contract` with consent to the unit. |
+
+## Confirmed by Reltix and our assumptions
+
+**Confirmed by Reltix (on site, 20 Nov)** · [Original notes](assumptions.md)
+
+- Managers decide repairs alone up to a limit agreed per owner, most often €3–4k; above it, the owner is asked.
+- Craftsmen get jobs mostly by WhatsApp; longer offers go by email.
+- Heating is mostly central, often gas; 10–15% of buildings still use oil.
+- Invoices below the limit mostly go through Reltix; above it, sometimes straight to the owner.
+
+**Our assumptions**
+
+- Reltix keeps its own list of craftsmen, with framework terms (rates, area, response time) and each building's maintenance firm.
+- In Germany the signed lease covers sharing the data a repair needs, so we inform and log instead of asking for new consent.
+- A repair's estimated cost comes from framework rates, so centrix can check it against the limit before dispatching.
+- Craftsmen share free slots; when none fits, they propose a time on the job card.
+- Tenants' phone numbers are on file, so callers are identified; an unknown number is checked by name and address.
+- Access details (key safe code, caretaker) are stored in centrix and released only after Accept.
+- Craftsmen send invoices as PDF; we read number and amount with OpenAI.
+- All data is synthetic and extends Reltix's sample payload.
