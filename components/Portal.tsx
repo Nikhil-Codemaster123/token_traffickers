@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { fmtTime } from "@/lib/time";
 import { shrinkImage } from "./imageUpload";
-import { btn, inputClass, meta, PhoneFrame, Spinner } from "./ui";
+import { btn, Icon, iconTile, inputClass, meta, phoneCard, PhoneFrame, phoneHero, Spinner } from "./ui";
 import { post, usePoll } from "./usePoll";
 
 type TenantView = {
@@ -56,40 +56,40 @@ export function Portal({ caseId }: { caseId: string }) {
 
   return (
     <PhoneFrame label="Tenant portal">
-      {!data && (error ? <p className="p-5 text-sm text-rose-700">{error}</p> : <div className="p-5"><Spinner /></div>)}
+      {!data && (error ? <p className="m-4 rounded-xl bg-rose-50 p-4 text-sm text-rose-800 ring-1 ring-rose-200 ring-inset">{error}</p> : <div className="p-5"><Spinner /></div>)}
       {data && (
-        <div className="@container space-y-6 p-5 sm:p-6">
-          <header className="space-y-2">
+        <div className="@container space-y-4 p-3 sm:p-4">
+          <header className={phoneHero}>
             <p className={meta}>{data.address}</p>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950"><span className="capitalize">{data.category}</span>{data.scope === "building" ? " · whole building" : ""}</h1>
+            <h1 className="text-2xl leading-tight font-semibold tracking-tight text-slate-950"><span className="capitalize">{data.category}</span>{data.scope === "building" ? " · whole building" : ""}</h1>
             <p className="wrap-anywhere">{data.symptoms}</p>
           </header>
 
-          <ol className="repair-progress">
+          <ol className={`${phoneCard} repair-progress`}>
             {STEPS.map((s) => (
               <li key={s.label}>
                 <div className={`step-marker ${s.when(data.status) ? "step-complete" : ""}`} />
-                <div className={`text-xs leading-4 ${s.when(data.status) ? "font-medium text-slate-800" : "text-slate-500"}`}>{s.label}</div>
+                <div className={`text-xs leading-4 ${s.when(data.status) ? "font-semibold text-slate-900" : "text-slate-500"}`}>{s.label}</div>
               </li>
             ))}
           </ol>
 
           {data.status === "completed" && (
-            <div className="space-y-3 border-t border-slate-100 pt-4">
-              <h2 className="text-sm font-semibold text-slate-900">Is your heating working again?</h2>
+            <div className={`${phoneCard} space-y-3 bg-linear-to-br from-white to-indigo-50/70`}>
+              <h2 className="text-base font-semibold tracking-tight text-slate-950">Is your heating working again?</h2>
               <div className="grid gap-3">
-                <button disabled={!!busy} onClick={() => run("yes", () => post(`/api/portal/${caseId}/confirm`, { fixed: true }))} className={btn.success}>Yes, it works</button>
+                <button disabled={!!busy} onClick={() => run("yes", () => post(`/api/portal/${caseId}/confirm`, { fixed: true }))} className={`${btn.success} py-3.5`}><Icon name="check" />Yes, it works</button>
                 <button disabled={!!busy} onClick={() => run("no", () => post(`/api/portal/${caseId}/confirm`, { fixed: false }))} className={btn.secondary}>No, still broken</button>
               </div>
             </div>
           )}
 
           {data.status === "stopped" ? (
-            <div className="rounded-lg bg-rose-50 px-4 py-3 text-rose-800">The property manager paused this appointment and will contact you.</div>
+            <div className="rounded-xl bg-rose-50 px-4 py-3 text-rose-800 ring-1 ring-rose-200 ring-inset">The property manager paused this appointment and will contact you.</div>
           ) : data.partner ? (
-            <div className="flex items-start gap-4 border-y border-slate-200 py-4">
-              <span aria-hidden="true" className="calendar-mark mt-1 text-indigo-700" />
-              <div className="min-w-0 space-y-1">
+            <div className={`${phoneCard} flex items-start gap-3`}>
+              <span className={iconTile}><Icon name="calendar" /></span>
+              <div className="min-w-0 space-y-1 wrap-anywhere">
                 <div className={meta}>Appointment</div>
                 <div className="font-semibold text-slate-950">{data.appointment || "being arranged"}</div>
                 <div className="text-slate-600">{data.partner}</div>
@@ -98,8 +98,9 @@ export function Portal({ caseId }: { caseId: string }) {
           ) : null}
 
           {!["closed", "stopped"].includes(data.status) && (
-            <div className="space-y-3">
-              <label className={`${btn.secondary} relative w-full py-2`}>
+            <div className={`${phoneCard} space-y-3`}>
+              <label className={`${btn.secondary} relative w-full`}>
+                <Icon name="photo" />
                 {busy === "photo" ? "Uploading…" : "Add a photo (boiler display, radiator)"}
                 <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
               </label>
@@ -123,13 +124,13 @@ export function Portal({ caseId }: { caseId: string }) {
               </div>
             </div>
           )}
-          {msg && <p className="text-sm text-rose-700">{msg}</p>}
+          {msg && <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-800 ring-1 ring-rose-200 ring-inset">{msg}</p>}
 
-          <div className="space-y-3 border-t border-slate-100 pt-4">
-            <h2 className="text-sm font-semibold text-slate-900">Updates</h2>
-            <ol className="space-y-3">
+          <div className={`${phoneCard} space-y-3`}>
+            <h2 className="text-base font-semibold tracking-tight text-slate-950">Updates</h2>
+            <ol className="divide-y divide-slate-100">
               {[...data.updates].reverse().map((u, i) => (
-                <li key={i} className="flex gap-3 text-sm">
+                <li key={i} className="flex gap-3 py-2 text-sm first:pt-0 last:pb-0">
                   <span className="w-11 shrink-0 font-mono text-xs leading-6 text-slate-500 tabular-nums">{fmtTime(u.at)}</span>
                   <span className="min-w-0 wrap-anywhere">{u.text}</span>
                 </li>
