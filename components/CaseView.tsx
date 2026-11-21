@@ -23,6 +23,9 @@ type Manager = {
     pick_reasons: string[];
     estimated_cost_eur: number | null;
     approval: string | null;
+    offer_document_id: string | null;
+    offer_approval_limit_eur: number | null;
+    offer_resume_status: string | null;
     job_token: string | null;
     result: unknown;
     created_at: string;
@@ -36,7 +39,7 @@ type Manager = {
   consent: { data_shared: string[]; legal_basis: string; given_at: string; channel: string } | null;
   documents: Doc[];
   events: Ev[];
-  effort: { tenant_calls: number; craftsman_taps: number; manager_clicks: number };
+  effort: { tenant_calls: number; craftsman_taps: number; manager_clicks: number; owner_clicks: number };
 };
 
 const STOPPABLE = ["booked", "dispatched", "scheduled", "awaiting_approval", "partner_picked"];
@@ -64,6 +67,7 @@ export function CaseView({ id }: { id: string }) {
   if (!data) return <div className="mx-auto max-w-6xl px-4 py-6"><Spinner /></div>;
 
   const c = data.case;
+  const offer = data.documents.find((d) => d.document_id === c.offer_document_id);
   const invoice = data.documents.find((d) => d.type === "invoice");
   const photos = data.documents.filter((d) => d.type === "photo" && d.file_url);
 
@@ -82,7 +86,7 @@ export function CaseView({ id }: { id: string }) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <StatusChip status={c.status} />
+          <StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} />
           {STOPPABLE.includes(c.status) && (
             <button disabled={busy} onClick={() => act("stop")} className={btn.danger}>Stop dispatch</button>
           )}
@@ -129,20 +133,22 @@ export function CaseView({ id }: { id: string }) {
           </Card>
 
           <Card title="Approval">
-            {c.estimated_cost_eur === null ? (
+            {offer ? (
+              <p className="text-sm">Offer {offer.number} <b>{euros.format(Number(offer.amount_eur))}</b> · owner&apos;s limit <b>{euros.format(c.offer_approval_limit_eur ?? data.approval_limit_eur)}</b></p>
+            ) : c.estimated_cost_eur === null ? (
               <p className="text-sm text-slate-500">No estimate yet.</p>
             ) : (
-              <>
-                <p className="text-sm">Estimate <b>€{c.estimated_cost_eur}</b> · owner&apos;s limit <b>€{data.approval_limit_eur}</b></p>
-                {c.approval === "auto" && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Under the limit: sent to the firm automatically.</p>}
-                {c.approval === "manager" && <p className="mt-2 rounded-lg bg-indigo-50 px-3 py-2 text-sm text-indigo-800">Approved by the manager.</p>}
-                {c.status === "awaiting_approval" && (
-                  <div className="mt-2 space-y-2">
-                    <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Above the limit: the owner has to agree first.</p>
-                    <button disabled={busy} onClick={() => act("approve")} className={btn.primary}>Owner agreed: approve</button>
-                  </div>
-                )}
-              </>
+              <p className="text-sm">Estimate <b>€{c.estimated_cost_eur}</b> · owner&apos;s limit <b>€{data.approval_limit_eur}</b></p>
+            )}
+            {c.approval === "owner" && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Approved by the owner.</p>}
+            {offer && Number(offer.amount_eur) <= (c.offer_approval_limit_eur ?? data.approval_limit_eur) && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Within the limit. The firm can go ahead.</p>}
+            {!offer && c.approval === "auto" && <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Under the limit: sent to the firm automatically.</p>}
+            {!offer && c.approval === "manager" && <p className="mt-2 rounded-lg bg-indigo-50 px-3 py-2 text-sm text-indigo-800">Approved by the manager.</p>}
+            {c.status === "awaiting_approval" && (
+              <div className="mt-2 space-y-2">
+                <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Above the limit: the owner has to agree first.</p>
+                <button disabled={busy} onClick={() => act("approve")} className={btn.primary}>Owner agreed: approve</button>
+              </div>
             )}
           </Card>
 
@@ -151,11 +157,13 @@ export function CaseView({ id }: { id: string }) {
               <Field row label={data.effort.tenant_calls > 1 ? "Tenants" : "Tenant"} value={plural(data.effort.tenant_calls, "call")} />
               <Field row label="Craftsman" value={plural(data.effort.craftsman_taps, "tap")} />
               <Field row label="Property manager" value={plural(data.effort.manager_clicks, "click")} />
+              <Field row label="Owner" value={plural(data.effort.owner_clicks, "click")} />
             </dl>
           </Card>
 
           <Card title="Documents">
-            {!invoice && photos.length === 0 && <p className="text-sm text-slate-500">None yet.</p>}
+            {!offer && !invoice && photos.length === 0 && <p className="text-sm text-slate-500">None yet.</p>}
+            {offer?.file_url && <div className="mb-2 text-sm"><a href={offer.file_url} target="_blank" rel="noreferrer" className="text-indigo-600 underline underline-offset-2">Open offer {offer.number}</a></div>}
             {invoice && (
               <div className="text-sm">
                 <div className="font-medium">Invoice {invoice.number ?? "(no number)"}</div>
@@ -196,6 +204,8 @@ export function CaseView({ id }: { id: string }) {
     </div>
   );
 }
+
+const euros = new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" });
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 

@@ -16,6 +16,10 @@ export const tenantMsg = {
       : `Hi ${first(name)}, this is already reported: the heating for the whole building.${partner ? ` ${partner} is coming on ${slot}.` : ""} Updates:`,
   confirmed: (l: string | null | undefined, partner: string, slot: string) =>
     lang(l) === "de" ? `${partner} hat den Termin ${slot} bestätigt.` : `${partner} confirmed the appointment ${slot}.`,
+  offerApproved: (l: string | null | undefined, partner: string) =>
+    lang(l) === "de"
+      ? `Die Reparatur wurde freigegeben. ${partner} kann jetzt loslegen.`
+      : `The owner approved the repair. ${partner} can now go ahead.`,
   done: (l: string | null | undefined, partner: string) =>
     lang(l) === "de"
       ? `${partner} hat die Reparatur abgeschlossen. Funktioniert die Heizung wieder? Kurz bestätigen:`

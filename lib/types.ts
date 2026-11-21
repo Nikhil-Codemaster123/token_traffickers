@@ -73,6 +73,10 @@ export type CaseRow = {
   pick_reasons: string[];
   estimated_cost_eur: number | null;
   approval: string | null;
+  offer_document_id: string | null;
+  offer_approval_limit_eur: number | null;
+  owner_token: string | null;
+  offer_resume_status: string | null;
   slot_id: string | null;
   appointment_start: string | null;
   appointment_end: string | null;

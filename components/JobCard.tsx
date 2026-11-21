@@ -7,6 +7,7 @@ import { post, usePoll } from "./usePoll";
 
 type Job = {
   status: string;
+  waiting_for_owner: boolean;
   partner: string | null;
   job_card: { headline: string; problem_summary: string; urgency_reason: string; checklist: string[] } | null;
   street: string;
@@ -29,6 +30,7 @@ export function JobCard({ token }: { token: string }) {
   const [proposal, setProposal] = useState("");
   const [note, setNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [offerFile, setOfferFile] = useState<File | null>(null);
   const [number, setNumber] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -52,6 +54,19 @@ export function JobCard({ token }: { token: string }) {
     if (number) form.append("number", number);
     if (amount) form.append("amount_eur", amount);
     await run("done", () => post(`/api/job/${token}/done`, form));
+  }
+
+  async function sendOffer(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!offerFile) return;
+    const form = new FormData(e.currentTarget);
+    const offerForm = e.currentTarget;
+    await run("offer", async () => {
+      const result = await post<{ needsOwner: boolean }>(`/api/job/${token}/offer`, form);
+      setOfferFile(null);
+      offerForm.reset();
+      setMsg(result.needsOwner ? null : "Go ahead. The offer is within the approval limit.");
+    });
   }
 
   return (
@@ -118,6 +133,17 @@ export function JobCard({ token }: { token: string }) {
                 </div>
               )}
             </div>
+          )}
+
+          {data.waiting_for_owner && <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">Waiting for owner</p>}
+
+          {data.status === "scheduled" && (
+            <form onSubmit={sendOffer} className="space-y-2 rounded-xl border border-slate-200 p-3">
+              <label className="block text-sm font-medium" htmlFor="offer-pdf">Offer PDF</label>
+              <input id="offer-pdf" name="file" type="file" accept="application/pdf,.pdf" required disabled={!!busy}
+                onChange={(e) => setOfferFile(e.target.files?.[0] ?? null)} className="block w-full text-sm" />
+              <button disabled={!!busy || !offerFile} className={`${btn.secondary} w-full`}>{busy === "offer" ? "Reading the offer…" : "Send offer"}</button>
+            </form>
           )}
 
           {data.status === "scheduled" && (

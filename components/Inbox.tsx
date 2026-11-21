@@ -12,6 +12,7 @@ type CaseItem = {
   scope: string;
   urgency: string;
   status: string;
+  offer_resume_status: string | null;
   symptoms: string | null;
   approval: string | null;
   reporters: string[];
@@ -80,7 +81,7 @@ export function Inbox() {
                     <div>{c.partner_name ?? "—"}</div>
                     <div className="text-xs text-slate-500">{c.appointment}</div>
                   </td>
-                  <td className="px-4 py-3"><StatusChip status={c.status} /></td>
+                  <td className="px-4 py-3"><StatusChip status={c.status} waitingForOwner={!!c.offer_resume_status} /></td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-500">{fmtDay(c.created_at)}, {fmtTime(c.created_at)}</td>
                 </tr>
               ))}

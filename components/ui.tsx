@@ -14,9 +14,9 @@ export const STATUS: Record<string, { label: string; cls: string }> = {
   emergency: { label: "Emergency", cls: "bg-red-600 text-white" },
 };
 
-export function StatusChip({ status }: { status: string }) {
+export function StatusChip({ status, waitingForOwner = false }: { status: string; waitingForOwner?: boolean }) {
   const s = STATUS[status] ?? { label: status, cls: "bg-slate-100 text-slate-700" };
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${s.cls}`}>{status === "awaiting_approval" && waitingForOwner ? "Waiting for owner" : s.label}</span>;
 }
 
 export const ACTOR: Record<string, { label: string; dot: string }> = {
